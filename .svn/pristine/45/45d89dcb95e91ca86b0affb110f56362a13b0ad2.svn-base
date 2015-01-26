@@ -1,6 +1,0 @@
-include _navbar
-
-//.container
-div(id='page-wrapper', resize="")
-    div.row(ui-view="")
-        
