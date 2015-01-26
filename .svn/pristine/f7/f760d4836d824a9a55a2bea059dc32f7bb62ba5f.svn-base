@@ -1,0 +1,64 @@
+/*
+  Handles environment interface with Pivotal PaaS.
+ */
+// import and configure nconf
+ 
+// Constructor
+function Platform() {
+
+	var self = {};
+
+	var nconf = require('nconf').file('./config/pivotal-config.json');
+	var env = process.env.VCAP_SERVICES;
+    var services = env != null ? JSON.parse(env) : nconf.get('appServices');
+	
+	console.log('VCAP_SERVICES=' + services);
+
+	// Flatten the user provided services onto the
+	// marketplace services.
+	self.getServiceEndpoint = function(name) {
+	    var result = undefined;
+		
+		// First search for the service under all of the keys that
+		// are not 'user-provided' on the first item that has the
+		// name equal to target name.
+		for(var prop in services) {
+			if (result === undefined && services.hasOwnProperty(prop) && prop != 'user-provided') {
+				var value = services[prop];
+				value.some(function(el, j) {
+					return el.name == name ? ((result = el), true) : false;
+				});
+			}
+		}
+		
+		// If it is user provided we need to query under that
+		// key.
+		if (result === undefined) {
+		    var userProvided = services['user-provided'];
+			if (userProvided !== undefined) {
+			    userProvided.some(function(el, i) {
+				    return el.name == name ? ((result = el), true) : false; 
+				});
+			}
+		}
+		
+		return result;
+	}
+	
+	//
+	// Returns a property for the given name.
+	//
+	self.get = function(name) {
+		var value = nconf.get(name);
+		switch(name) {
+		case 'appHost': return process.env.VCAP_APP_HOST || value;
+		case 'appPort': return process.env.VCAP_APP_PORT || value;
+		case 'app': return process.env.VCAP_APPLICATION || value;
+		default: return process.env[name] || value;
+		}
+	}
+	
+	return self;
+}
+
+module.exports = new Platform();

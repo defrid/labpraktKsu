@@ -1,0 +1,15 @@
+$.extend(true, window, {
+    "Slick": {
+        "Validators": {
+            "Function": FunctionValidator
+        }
+    }
+});
+
+function FunctionValidator(options) {
+    var validationFunction = new Function('value', 'row', options.function);
+
+    this.validate = function(value, row){
+        return validationFunction(value, row);
+    }
+};

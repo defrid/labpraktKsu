@@ -1,0 +1,142 @@
+var url = require('url');
+
+var express = require('express');
+var http = require('http');
+var querystring = require('querystring');
+
+var config = null;
+
+// conf = {
+module.exports = function(conf) {
+  config = conf;
+  var router = express.Router();
+  createRoutes(router);
+  
+  //AddLog('Audit nodejs service started.', 'INFO');
+  
+  return router;
+};
+
+function createRoutes(router) {
+  router.get('/get', function(req, res) {console.log("processing auditview-1"); getAudits(req, res); });
+};
+
+// function AddLog(message, level)
+// {
+  // var body = JSON.stringify({
+    // Message:message, TimeStamp:new Date(), Level:level, Domain:'auditview.js', LoggerName:'auditview.js'
+  // });
+  
+  // if(config.getServiceEndpoint("audit-service-rd") === undefined)
+  // {
+    // console.log("auditview.js: cannot find endpoint for: audit-service-rd");
+    // return;
+  // }
+  
+  // var parsedUrl = url.parse(config.getServiceEndpoint("audit-service-rd").credentials.uri);
+  // var options = {
+    // hostname: parsedUrl.hostname,
+	// port:     parsedUrl.port,
+    // path:     "/api/v1/Audit", //config.get("dataPath"),
+    // method:   'POST',
+    // headers:  {
+      // 'Connection': 'close',
+      // "Content-Type": "application/json"
+    // }    
+  // };
+
+  // var req = http.request(options, function(r) {
+    // // console.log(r.statusCode + ' ' + http.STATUS_CODES[r.statusCode]);
+  // });
+
+  // req.on('error', function(e) {
+    // console.log('Failed to add log: ' + JSON.stringify(e));
+  // });
+
+  // req.end(body);
+// };
+
+function getAudits(req_ui, res) {
+  console.log("getAudits call");
+
+  var files = [];
+  
+  // a) getting from cassandra
+  /*
+  var client = new cql.Client(clientOptions);
+  var consistency = cql.types.consistencies.one;
+  var querySelectAll = 'select log_timestamp,id,app_name,level,message,logger_name,host_ip from logging.log4netentries';// order by log_timestamp';
+  client.eachRow(querySelectAll, [], consistency, function(n, row) {
+    if (row) {
+      files.push(row)
+    } else {
+      console.log('Error: ' + err);
+      res.send(err);
+    }
+  }, function(err, rowLength) {
+    if (!err) {
+      console.log('files.Length: ' + files.length);
+      //res.render('index', {files: files});
+      res.json(files);
+      //JSON.stringify(files)
+    }
+    else{
+      console.log('err: ' + err);
+      res.send(err);
+    }
+  });
+  */
+  
+  // b) getting from REST service
+  
+  if(config.getServiceEndpoint("audit-service-rd") === undefined)
+  {
+    console.log("auditview.js: cannot find endpoint for: audit-service-rd");
+    return;
+  }
+
+var parsedUrl = url.parse(config.getServiceEndpoint("audit-service-rd").credentials.uri);
+  var queryStr = "";
+  if(req_ui.query !== undefined)
+  {
+    queryStr = "?"+querystring.stringify(req_ui.query);
+  }
+  var options = {
+    hostname: parsedUrl.hostname,
+	port:     parsedUrl.port,
+    path:     "/api/v1/Audit/Get"+queryStr, //config.get("dataPath"),
+    method:   'GET',
+    headers:  {
+      'Connection': 'close'
+    }    
+  };
+
+  //console.log('options: ' + JSON.stringify(options));
+  //console.log('query: ' + queryStr);
+
+  var data_get = "";
+  var req = http.request(options, function(r){
+      r.setEncoding('utf-8');
+      r.on('data', function(chunk) {
+      data_get = data_get + chunk;
+      //console.log("getting data:"+data_get.length+", chunk:"+chunk.length);
+    });
+    r.on('end', function() {
+      //console.log("end code:"+r.statusCode);
+      if (r.statusCode >= 200 && r.statusCode < 400) {
+        //console.log("data_get:"+data_get.length);
+        res.send(data_get);
+      } else {
+        console.log("status code:"+r.statusCode);
+      }
+    }); 
+  });
+
+  req.on('error', function(e) {
+    console.log('getAudits: Failed to get all audits: ' + JSON.stringify(e));
+  });
+
+  req.end();
+  
+}
+

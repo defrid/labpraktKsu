@@ -1,0 +1,525 @@
+/*
+  Module for file uploading;
+  Usage:
+    fileUpload = require('...file-uplaod')(
+
+
+
+ */
+ 
+var url = require('url');
+
+// import express
+var express = require('express');
+var cookieParser = require('cookie-parser');
+
+// create an express app
+// var app = express();
+// import path utilities
+// var path = require('path');
+
+// import logger
+var logger = require('morgan');
+
+// import filesystem
+var fs = require('fs');
+
+// import post stream parser
+var busboy = require('connect-busboy');
+
+// var cql = require('node-cassandra-cql');
+// var cql = require('cassandra-driver');
+
+// to send file to another service;
+var http = require('http');
+
+var server = null;
+var config = null;
+var authProvider = null;
+var clientOptions = null;
+
+// {unique_id: {maxval: maxvalue, value: value}, ...}
+var clientList = {};
+
+// conf - nconf.get('file-upload') - the root for our module with
+// some configuration or empty for defaults;
+// expressApp - is an express application where we will add some routes;
+// baseref - baseref for our module, i.e. '/files'; we will prepend this
+// baseref to all our routes (for uploading and getting different data);
+module.exports = function(conf) {
+  config = conf;
+  var router = express.Router();
+  createRoutes(router);
+  return router;
+};
+
+function createRoutes(router) {
+
+  // initCql();
+
+  router.use(cookieParser());
+  router.use(busboy());
+
+  /* router.get('/', function(req, res) {
+    getFilesList(res);
+  }); */
+
+  router.post('/fileupload', fileUpload);
+  router.get('/file/:id', function(req, res) {
+    getFile(res, req.params.id);
+  });
+
+  router.get('/delete/:id', deleteFile);
+  router.get('/fileprogress', fileProgress);
+};
+
+var cookieUploaderID = "UploaderID";
+
+var keyspaceCreate = "create keyspace if not exists Test with replication = " +
+  "{'class': 'SimpleStrategy', 'replication_factor' : 3};";
+var useKeyspace = "use Test;";
+var tableDrop = "drop table if exists Test.files;";
+var tableCreate = "create table if not exists Test.files (" +
+  "id uuid primary key, " +
+  "filename text, " +
+  "mimetype text, " +
+  "length int, " +
+  "data blob) with comment = 'This is just a test file storage table';";
+var queryInsert = 'insert into Test.files (id, filename, mimetype, length, data) values (?, ?, ?, ?, ?)';
+var querySelect = 'select id, filename, mimetype, length, data from Test.files where id = ?';
+var querySelectAll = 'select id, filename, mimetype, length from Test.files';
+var queryDelete = 'delete from Test.files where id = ?';
+
+
+
+
+// self-called function
+function initCql() {
+
+  var credentials = config.getServiceEndpoint("fdm-api").credentials;
+
+  authProvider = new cql.auth.PlainTextAuthProvider(credentials.Username, credentials.Password);
+
+  clientOptions = {
+    contactPoints: credentials.ContactPoints.split(','),
+    authProvider: authProvider
+  };
+
+  var client = new cql.Client(clientOptions);
+
+  var ok = true;
+
+  console.log("hosts: " + credentials.ContactPoints + '; username: ' 
+	+ credentials.Username + '; pwd: ' + credentials.Password);
+
+  client.execute(keyspaceCreate, function(err, result) {
+    if (err) {
+      console.log('failed to create keyspace: ' + err);
+      ok = false;
+    };
+
+    if (ok) client.execute(useKeyspace, function(err, result) {
+      if (err) {
+        console.log('failed to use keyspace ' + err);
+        ok = false;
+      };
+    });
+
+    /* if (ok) client.execute(tableDrop, function(err, result) {
+     if (err) {
+     console.log('failed to drop the table files: ' + err);
+     ok = false;
+     };
+     }); */
+
+    if (ok) client.execute(tableCreate, function(err, result) {
+      if (err) {
+        console.log('failed to create table: ' + err);
+        ok = false;
+      };
+    });
+
+    if (ok) {
+      console.log('CQL initialized.');
+      // run the app
+
+    } else {
+      console.log('CQL initialization failed.');
+    };
+
+  });
+};
+
+function insertIntoDb(params, data, cb) {
+  console.log('Storing in DB...');
+
+  var client = new cql.Client(clientOptions);
+  var id = cql.types.uuid();
+  var consistency = cql.types.consistencies.one;
+  var p = [id, params.name, params.mimetype, data.length, data];
+
+  client.executeAsPrepared(queryInsert, p, consistency, function(e) {
+    if (!e) {
+      console.log('Inserted. ID: ' + id);
+
+      // res.redirect('back');
+    }
+    else {
+      console.log('Something went wrong and the row was not updated: ' + e);
+      params.err.error = -1;
+      params.err.descr = e;
+    };
+    cb(params.err);
+  });
+};
+
+function sendToService(params, data, cb) {
+  var credentials = config.getServiceEndpoint("gateway-http-service-rd").credentials;
+  
+  console.log('uri: ' + credentials.uri);
+  var parsedUrl = url.parse(credentials.uri);
+  console.log('hostname: ' + parsedUrl.hostname);
+  console.log('port: ' + parsedUrl.port);
+  
+  // Build the query string up 
+  var query = [];
+  for (var p in params.query) {
+    if (params.query.hasOwnProperty(p)) {
+      query.push(p + '=' + params.query[p]);
+    };
+  };
+  
+  console.log('Sending to service...');
+  var options = {
+    hostname: parsedUrl.hostname,
+    port:     parsedUrl.port,
+    path:     config.get("uploadPath") + (query.length > 0 ? '?' + query.join('&') : ''),
+    method:   'POST',
+    headers:  {
+      'Content-Length': data.length,
+      'Connection': 'close',
+      'X-Filename': params.name // X-File-Name
+    }
+  };
+
+  console.log('options: ' + JSON.stringify(options));
+
+  var req = http.request(options, function (res){
+    console.log(res.statusCode + ' ' + http.STATUS_CODES[res.statusCode]);
+    console.log(JSON.stringify(res.headers));
+
+    params.err.descr = '';
+    res.setEncoding('utf-8');
+
+    res.on('data', function(c) {
+      params.err.descr += c;
+    });
+
+    res.on('end', function() {
+      if (res.statusCode >= 200 && res.statusCode < 300) {
+        params.err.error = 0;
+      } else {
+        params.err.error = -1;
+        params.err.descr = http.STATUS_CODES[res.statusCode];
+      }
+      cb(params.err);
+    });
+  });
+
+  req.on('error', function(e) {
+    console.log(JSON.stringify(e));
+    params.err.error = -1;
+    params.err.descr = e.code || e;
+    cb(params.err);
+  });
+
+  req.write(data);
+  req.end();
+};
+
+
+function fileUpload(req, res) {
+  getAuditSession(req, function(result) {
+    if (result.data) {
+      console.log('[FileUpload] [AuditSession]: ' + JSON.stringify(result.data));
+      processUpload(req, res, result.data);
+    } else {
+      console.log('[FileUpload] [AuditSession]: error: ' + JSON.stringify(result.err));
+      res.send(result.err);
+    };
+  })
+};
+
+function processUpload(req, res, auditSession) {
+  var params = {
+    name:     '',
+    mimetype: '',
+    err:      {error: 0, descr: "ok"},
+    query: {
+      AuditSessionId: auditSession.AuditSessionId,
+      // redirect:     null,
+      type:         'csv',
+      // table:        null,
+    }
+  };
+
+  req.pipe(req.busboy);
+
+  var client = clientList[req.cookies[cookieUploaderID]];
+  if (client) {
+    client.value = 0;
+    client.maxval = parseInt(req.get('Content-Length'));
+
+    console.log('clientID: ' + req.cookies[cookieUploaderID] + '; size: ' +
+      req.get('Content-Length'));
+
+  } else {
+    // actually will not help because cookie will be set after post will finish;
+    // setNewClient(req, res);
+    // just a dummy client to not fall down;
+    client = {value: 0, maxval: 0};
+  };
+
+  req.busboy.on('file', function(fieldname, file, filename, encoding, mimetype) {
+    console.log('File [' + fieldname + ']: filename: ' + filename +
+      ', encoding: ' + encoding + ', mimetype: ' + mimetype);
+
+    params.name = params.query.name = filename;
+    params.mimetype = mimetype;
+
+    var buffers = [];
+    file.on('data', function (data) {
+      // console.log('File [' + fieldname + '] got ' + data.length + ' bytes');
+      client.value += data.length;
+      buffers.push(data);
+    });
+
+    file.on('end', function () {
+      var len = 0;
+      for (var i = 0; i < buffers.length; i++) len += buffers[i].length;
+      console.log('File [' + fieldname + '] \'' + filename + '\' Finished. ' +
+        ' Total length: ' + len + '. Parts: ' + buffers.length);
+
+      var finalBuffer = Buffer.concat(buffers, len);
+      sendToService(params, finalBuffer, finished);
+      /* if (params.redirect != 'cassandra') {
+        sendToService(params, finalBuffer, finished);
+      } else {
+        insertIntoDb(params, finalBuffer, finished);
+      }; */
+    });
+  });
+
+  req.busboy.on('field', function(fieldname, val, fieldnameTruncated, valTruncated) {
+    console.log('Field [' + fieldname + ']: ' + val);
+    switch (fieldname) {
+      case 'redirect':  params.query.redirect = val; break;
+      case 'type':      params.query.type = val; break;
+      case 'table':     params.query.table = val; break;
+      default: break;
+    };
+
+  });
+
+  req.busboy.on('finish', function() {
+    console.log('Done parsing form!');
+    client.value = client.maxval;
+
+  });
+
+  function finished(err) {
+    res.send(err);
+  };
+};
+
+function deleteFile(req, res) {
+  var client = new cql.Client(clientOptions);
+
+  var params = [req.params.id];
+  var consistency = cql.types.consistencies.one;
+  client.executeAsPrepared(queryDelete, params, consistency, function(err) {
+    if (!err) {
+      // todo: change to some useful response for client API;
+      res.redirect('back');
+    } else {
+      res.send(err);
+    };
+  })
+};
+
+// should be launched by script once when page loaded to initialize client;
+// then script needs to get this link in periodic events (per second or more
+// often);
+// use '/fileprogress?a=start' when clicking on Submit;
+function fileProgress(req, res) {
+  var id = req.cookies[cookieUploaderID];
+  var c = null;
+
+  if (id) {
+    c = clientList[id];
+  } else {
+    id = cql.types.uuid();
+    res.cookie(cookieUploaderID, id);
+  };
+
+  if (!c) {
+    clientList[id] = c = {value: 0, maxval: 0};
+  } else {
+    if (req.query.a) {
+      c.value = c.maxval = 0;
+    };
+  };
+
+  // console.log('id :' + id, 'client: ' + JSON.stringify(c));
+
+  res.send(c);
+};
+
+function getFile(res, id) {
+  var client = new cql.Client(clientOptions);
+
+  var params = [id];
+  var consistency = cql.types.consistencies.one;
+
+  client.streamField(querySelect, params, consistency,
+    function(n, row, stream) {
+      console.log('n=' + n);
+      // console.log('row: ' + row);
+      // res.send(row);
+
+      if (row) {
+        res.set({
+          'Content-Type':   row.mimetype,
+          'Content-Length': row.length,
+          'Accept-Ranges':  'bytes'
+        });
+
+        stream.pipe(res);
+
+        /* stream.on('data', function (chunk) {
+         console.log('Got data lenght: ' + chunk.length);
+         buffers.push(chunk);
+         // res.send(chunk);
+         });
+
+         stream.on('end', function () {
+         console.log('Finished');
+         }); */
+      } else {
+        res.send('File not found');
+      }
+    },
+    function(err, rowCount) {
+      if (err) {
+        console.log('Something went wrong and row was not selected: ' + err);
+        res.send(err);
+      } else {
+        if (!(rowCount instanceof Object)) {
+          console.log('Finisehd. rowLength: ' + rowCount);
+          // res.send(rowCount);
+          // var finalBuffer = Buffer.concat(buffers);
+          // res.send(finalBuffer);
+        } else {
+          res.send('File not found');
+        };
+      };
+    });
+};
+
+function getFilesList(res) {
+  var client = new cql.Client(clientOptions);
+
+  var consistency = cql.types.consistencies.one;
+  var files = [];
+  client.eachRow(querySelectAll, [], consistency, function(n, row) {
+    if (row) {
+      files.push(row)
+    } else {
+      console.log('Error: ' + err);
+      res.send(err);
+    }
+  }, function(err, rowLength) {
+    if (!err) {
+      res.render('index', {files: files});
+    }
+    else{
+      res.send(err);
+    }
+  })
+};
+
+function getAuditSession(req, cb) {
+  var credentials = config.getServiceEndpoint("audit-service-rd").credentials;
+  var parsedUrl = url.parse(credentials.uri);
+
+  console.log('Getting audit session...');
+  var options = {
+    hostname: parsedUrl.hostname,
+    port:     parsedUrl.port,
+    path:     config.get("auditPath"),
+    method:   'POST',
+    headers: {
+      'Connection':   'close',
+      'Content-Type': 'application/json'
+    }
+  };
+
+  console.log("Upload options: " + JSON.stringify(options));
+
+  var d = {
+    Credentials: req.$user.user.id,
+    HostIP:      req.ip,
+    AuditType:   0,
+    Source:      "File upload",
+    Message:     "Get upload session ID",
+    Properties: {
+      test1: "properties if needed, may be filename",
+      test2: "test val2"
+    }
+  };
+
+  var responseData = '';
+  var result = {
+    err: {
+      error: 0,
+      descr: ''
+    },
+    data: null
+  };
+  var sreq = http.request(options, function (sres){
+    console.log(sres.statusCode + ' ' + http.STATUS_CODES[sres.statusCode]);
+    console.log(JSON.stringify(sres.headers));
+
+    sres.setEncoding('utf-8');
+    sres.on('data', function(c) {
+      responseData += c;
+    });
+
+    sres.on('end', function() {
+      if (sres.statusCode >= 200 && sres.statusCode < 400) {
+        try {
+          result.data = JSON.parse(responseData);
+        }
+        catch (e) {
+          result.err.error = -1;
+          result.err.descr = 'Failed to parse audit data: [' + e + ']';
+          console.log(result.err.descr);
+        }
+      } else {
+        result.err.error = sres.statusCode;
+        result.err.descr = http.STATUS_CODES[sres.statusCode];
+      };
+      cb(result);
+    });
+  });
+
+  sreq.on('error', function(e) {
+    console.log(JSON.stringify(e));
+    result.err.error = e.code;
+    result.err.descr = e.message;
+    cb(result);
+  });
+
+  sreq.write(JSON.stringify(d));
+  sreq.end();
+};

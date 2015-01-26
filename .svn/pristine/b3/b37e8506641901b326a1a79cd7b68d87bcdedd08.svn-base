@@ -1,0 +1,57 @@
+.gridStyle {
+    border: 1px solid rgb(212, 212, 212);
+    width: 600px;
+    //height: 300px;
+}
+
+
+input.editor-text {
+    width: 100%;
+    border: 0;
+    margin: 0;
+    background: transparent;
+    outline: 0;
+    padding: 0;
+}
+
+.slick-headers, .slick-header-columns, .slick-headerrow-column, .slick-header-column {
+    box-sizing: content-box;
+}
+
+.slick-cell {
+    box-sizing: content-box;
+}
+
+.grid-group {
+    font-weight: bold;
+}
+
+.grid-items {
+    color: green;
+}
+
+.slick-placeholder {
+    height: 30px;
+}
+
+.slick-group-indicator {
+    display: inline-block;
+    border-style: solid;
+    border-color: #c5c5c5;
+    border-width: 1px;
+    margin: 0 3px;
+    padding: .15em .15em .15em .4em;
+    line-height: 1.5em;
+    border-radius: 4px;
+    background: #EEEEEE;
+}
+.ui-dropbox-default {
+}
+
+.ui-dropbox-hover {
+    background: #ededed;
+}
+
+.slick-group-container {
+    display: inline-block;
+}

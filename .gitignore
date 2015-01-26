@@ -1,0 +1,45 @@
+# Environment variables
+.env
+
+# scm revert files
+**.orig
+
+# Mac finder artifacts
+.DS_Store
+
+# Netbeans project directory
+/nbproject/
+
+# RubyMine project files
+.idea
+
+# Textmate project files
+/*.tmproj
+
+# vim artifacts
+**.swp
+
+# various artifacts
+**.war
+*.rbc
+*.sassc
+.rspec
+
+
+node_modules
+app/dist
+app/.tmp
+.sass-cache
+app/.sass-cache
+app/client/bower_components
+app/client/app/bower_components
+app/client/app/scripts/js
+app/client/.editorconfig
+app/client/.idea
+app/client/app/uploads
+app/client/app/*.php
+app/client/app/scripts/config.js
+app/client/app/config.json
+app/client/core
+app/client/*.log
+app/client/app/styles/main.css

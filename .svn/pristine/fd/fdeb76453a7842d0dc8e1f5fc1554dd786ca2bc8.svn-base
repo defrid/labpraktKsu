@@ -1,0 +1,383 @@
+(function(window, angular) {
+    'use strict';
+    var module = angular.module("edm");
+
+    module.controller("BrowseController", function($scope, $state, $http, $location, $timeout) {
+        var columnFilters = {};
+
+        $scope.tableHeaders = [];
+        $scope.tableRows = [];
+        $scope.downloadLink = '/data/data.json';
+        $scope.downloadStatus = 'Retrieving data...';
+
+        var dataView, grid;
+
+        var timeStart = new Date();//////////////////////////////
+        $http.get($scope.downloadLink)
+            .success(function(data, status, headers, config) {
+                $scope.requestTime = new Date() - timeStart;
+                $scope.downloadStatus = 'Formatting...';
+                setHeaders(data.meta.attr);
+                $scope.tableRows = data.data;
+                $scope.tableRows = preProcessSlickRows($scope.tableRows);
+                $scope.bytesReceived = JSON.stringify(data).length;
+
+                if (!$scope.tableRows.length) $scope.downloadStatus = 'Nothing to show';
+
+                timeStart = new Date();//////////////////////////////START
+                initializeSlick();
+                $scope.renderTime = new Date() - timeStart;//////////////////////////////END
+
+            })
+            .error(function(data, status, headers, config, statusText) {
+                $scope.downloadStatus = 'Failed: ' + status + ' (' + statusText + ')';
+            });
+
+        function setHeaders(data) {
+            $scope.tableHeaders = data;//(data instanceof Array) ? data[0] : data;
+        };
+
+        function initializeSlick(){
+
+
+            var groupItemMetadataProvider = new Slick.Data.GroupItemMetadataProvider();
+
+            dataView = new Slick.Data.DataView({
+                groupItemMetadataProvider: groupItemMetadataProvider,
+                //inlineFilters: true
+            });
+
+            //configure column headers
+            var headers = configureHeaders($scope.tableHeaders);
+
+            var options = {
+                editable: true,
+                autoEdit: false,
+                rowHeight: 50,
+                headerRowHeight: 45,
+                enableColumnReorder: true,
+                forceSyncScrolling: true,
+                enableDraggableGroupBy: true,
+                multiColumnSort: true,
+                showHeaderRow: true,
+            };
+
+
+
+            grid = new Slick.Grid("#slick-table", dataView, headers, options);
+
+            grid.onSort.subscribe(function (e, args) {
+                var cols = args.sortCols;
+                dataView.sort(function (dataRow1, dataRow2) {
+                    for (var i = 0, l = cols.length; i < l; i++) {
+                        var field = cols[i].sortCol.field;
+                        var sign = cols[i].sortAsc ? 1 : -1;
+                        var value1 = dataRow1[field], value2 = dataRow2[field];
+
+                        // For now sorting sorts all columns as strings!
+                        if(cols[i].sortCol.style == "chart") {
+                            value1 = parseFloat(value1);
+                            value2 = parseFloat(value2);
+                        } // Here is just an example of working with numbers (for charts)
+
+                        if (value1 == null) {
+                            return -1 * sign;
+                        } else if (value2 == null) {
+                            return sign;
+                        } else if (value1 == "") {
+                            return -1 * sign;
+                        } else if (value2 == "") {
+                            return sign;
+                        }
+
+                        /*var value1 = (value1 === null) ? "" : "" + value1,
+                         value2 = (value2 === null) ? "" : "" + value2;*/
+
+                        var result = (value1 == value2 ? 0 : (value1 > value2 ? 1 : -1)) * sign;
+                        if (result != 0) {
+                            return result;
+                        }
+                    }
+                    return 0;
+                });
+                grid.invalidate();
+                grid.render();
+            });
+
+            $(grid.getHeaderRow()).delegate(":input", "change keyup", function (e) {
+                var columnId = $(this).data("columnId");
+                if (columnId != null) {
+                    columnFilters[columnId] = $.trim($(this).val());
+                    dataView.refresh();
+                }
+            });
+            grid.onHeaderRowCellRendered.subscribe(function(e, args) {
+                $(args.node).empty();
+                $("<input type='text' class='form-control'>")
+                    .data("columnId", args.column.id)
+                    .val(columnFilters[args.column.id])
+                    .appendTo(args.node);
+            });
+
+            
+            
+
+            var columnpicker = new Slick.Controls.ColumnPicker(headers, grid, options);
+
+            grid.registerPlugin(groupItemMetadataProvider);
+            grid.setSelectionModel(new Slick.CellSelectionModel());
+            defineCopyPaste(grid);
+
+            //var columnpicker = new Slick.Controls.ColumnPicker(headers, grid, options);
+
+            // wire up model events to drive the grid
+            dataView.onRowCountChanged.subscribe(function (e, args) {
+                grid.updateRowCount();
+                grid.render();
+            });
+
+            dataView.onRowsChanged.subscribe(function (e, args) {
+                grid.invalidateRows(args.rows);
+                grid.render();
+            });
+
+            grid.init();
+
+            dataView.beginUpdate();
+            dataView.setItems($scope.tableRows);
+            dataView.setFilter(filter);
+            dataView.endUpdate();
+            renderHeaderRow(grid);
+        }
+
+        function renderHeaderRow(grid) {
+
+            console.log(grid);
+
+            var $headerRow = grid.getHeaderRow();
+
+            var columns = grid.getColumns();
+
+
+            for (var i = 0; i < columns.length; i++) {
+                var row = $($headerRow.children[i]);
+
+                grid.onHeaderRowCellRendered.notify({
+                    "node": row[0],
+                    "column": columns[i],
+                    "grid": grid
+                });
+            }
+        }
+
+        function filter(item, args) {
+            for (var columnId in columnFilters) {
+                if (columnId !== undefined && columnFilters[columnId] !== "") {
+                    var filterField = grid.getColumns()[grid.getColumnIndex(columnId)].field;
+                    if (typeof(item[filterField]) == 'undefined' || item[filterField] == null)
+                        return false;
+                    if (item[filterField].toLowerCase().indexOf(columnFilters[filterField].toLowerCase()) == -1) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        //Define plugin. which allows you to do excel-like copy/paste
+        function defineCopyPaste(grid) {
+            var undoRedoBuffer = {
+                commandQueue : [],
+                commandCtr : 0,
+                queueAndExecuteCommand : function(editCommand) {
+                    this.commandQueue[this.commandCtr] = editCommand;
+                    this.commandCtr++;
+                    editCommand.execute();
+                },
+                undo : function() {
+                    if (this.commandCtr == 0)
+                        return;
+                    this.commandCtr--;
+                    var command = this.commandQueue[this.commandCtr];
+                    if (command && Slick.GlobalEditorLock.cancelCurrentEdit()) {
+                        command.undo();
+                    }
+                },
+                redo : function() {
+                    if (this.commandCtr >= this.commandQueue.length)
+                        return;
+                    var command = this.commandQueue[this.commandCtr];
+                    this.commandCtr++;
+                    if (command && Slick.GlobalEditorLock.cancelCurrentEdit()) {
+                        command.execute();
+                    }
+                }
+            }
+            // undo shortcut
+            $(document).keydown(function(e)
+            {
+                if (e.which == 90 && (e.ctrlKey || e.metaKey)) {    // CTRL + (shift) + Z
+                    if (e.shiftKey){
+                        undoRedoBuffer.redo();
+                    } else {
+                        undoRedoBuffer.undo();
+                    }
+                }
+            });
+            var pluginOptions = {
+                clipboardCommandHandler: function(editCommand){ undoRedoBuffer.queueAndExecuteCommand.call(undoRedoBuffer,editCommand); },
+                includeHeaderWhenCopying : false
+            };
+
+            grid.registerPlugin(new Slick.CellExternalCopyManager(pluginOptions));
+        }
+
+        function configureHeaders(data) {
+            //configure column headers
+            var headers = [],
+                cellRendererCounter = 0;
+            //angular.forEach($scope.tableHeaders, function(header){
+            //angular.forEach(data, function(header){
+            for (var i = 0 ; i < data.length; i++) {
+                var header = data[i];
+                var preparedHeader = _prepareHeader(header);
+
+                headers.push(preparedHeader);
+            }
+
+            return headers;
+
+
+            function _prepareHeader(header){
+                var name = prepareName(header.name);
+                var editorField = prepareEditorField(header.editorField);
+                var preparedHeader = {
+                    field: name,
+                    name: header.label,
+                    width: header.style === 'chart' ? 520 : 100,
+                    editor: editorField,
+                    id: name,
+                    resizable: true,
+                    sortable: true,
+                    minWidth: 30,
+                    style: header.style,
+                    validation: header.validation,
+                    rerenderOnResize: true,
+                    formatter: function(row, cell, value, columnDef, dataContext){
+                        cellRendererCounter++;
+                        if (!columnDef.style){
+                            return value;
+                        }
+
+                        switch (columnDef.style){
+                            case "currency":
+                                if (value > 0){
+                                    return '<span class="glyphicon glyphicon-usd"></span><span>' + value + '</span>'
+                                } else if (value < 0){
+                                    return '<span style="color:red;"><span class="glyphicon glyphicon-usd"></span>(' + (value * -1) + ')</span>'
+                                } else {
+                                    return "";
+                                }
+                                break
+                            case "boolean":
+                                if (value == "Y")
+                                    value = true;
+                                if (value == "N")
+                                    value = false;
+                                break
+                            case "chart":
+                                var id = "id" + cellRendererCounter;
+                                var result =  "<div id=\""+ id + "\"></div>"
+
+                                setTimeout((function(cellId, value){
+                                    return function(){
+
+                                        try {
+                                            var r = Raphael(cellId, 500, 50);
+                                        } catch (e) {
+                                            if (e instanceof TypeError) {
+                                                console.log("Raphael js TypeError");
+                                                return;
+                                            }
+                                        }
+
+                                        var barColor = '#0000FF';
+                                        if (value < 0) {
+                                            value = value * (-1);
+                                            barColor = '#FF0000';
+                                        }
+
+                                        var bar = r.rect(10,10,value/10000,30,6).attr({ stroke: 'none', fill: barColor });
+
+                                    };
+                                }(id, value)), 0)
+
+                                return result;
+                                break
+                        }
+                        if (cell !== 3){
+                            return value;
+                        }
+
+                        return r;
+                    },
+                    grouping: {
+                        getter: name,
+                        formatter: function (g) {
+                            return '<span class="grid-group">' + nameHash[g.getter] + ": " + g.value + ' <span class="grid-items">(' + g.count + ' items)</span></span>';
+                        },/*
+                         aggregators: [
+                         new Slick.Data.Aggregators.Avg(name)
+                         ],
+                         aggregateCollapsed: true,*/
+                        collapsed: true
+                    }
+                };
+                return preparedHeader;
+            }
+        }
+
+
+        function preProcessSlickRows(rows){
+            var result = [];
+            for (var i = 0; i < rows.length; i++){
+                var preparedRow = {
+                    id: "id_" + i
+                };
+                angular.forEach(rows[i], function(value, attrName){
+                    preparedRow[prepareName(attrName)] = value;
+                });
+                result.push(preparedRow);
+            }
+
+            return result;
+        }
+        var counter = 1,
+            nameHash = {};
+
+        function prepareName(attrName){
+            if (nameHash[attrName]){
+                return nameHash[attrName];
+            }
+            var newName = 'column' + counter++;
+            nameHash[newName] = attrName;
+            return nameHash[attrName] = newName;
+        }
+
+        function prepareEditorField(attrName) {
+            return Slick.Editors.Base;
+            if (attrName == "Integer" || true) {
+                return Slick.Editors.Integer;
+            } else if (attrName == "IsOTC") {
+                return Slick.CustomEditors.IsOTC;
+            } else if (attrName == "Float") {
+                return Slick.CustomEditors.Float;
+            } else if (attrName == "LongText") {
+                return Slick.Editors.LongText;
+            } else {
+                return Slick.Editors.Text;
+            }
+        }
+
+    });
+})(window, window.angular);

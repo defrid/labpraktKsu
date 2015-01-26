@@ -1,0 +1,8 @@
+{
+  "name": "edm.config",
+  "constants": {
+    "config": {
+      "appRootPath": "api"
+    }
+  }
+}

@@ -1,0 +1,32 @@
+div.content-container
+  form(name="uploadForm", ng-submit="mySubmit()",
+    ng-upload="uploadComplete(content)", action="{{uploadLink}}",
+    method="post", enctype="multipart/form-data")
+
+    | Type
+    select(name="type")
+      option(value="csv") csv
+      //- option(value="bla") bla
+
+    //- | Service
+    //- select(name="redirect")
+      option(value="service1") Service1
+      option(value="cassandra") Cassandra
+
+
+    // input(type="text", name="table", value="unknown")
+    input(type="file", name="file", id="file", my-file-display)
+    input(type="submit", value="Upload", ng-disabled="isLoading")
+
+    progress.uploadProgress(value="clientProgress.value", max="clientProgress.maxval", ng-hide="progressHide")
+
+    p(ng-hide="contentHide") content: ={{content | json}}
+
+    //
+      ul
+      each f in files
+        li
+          a(href='/file/' + f.id)
+          =f.filename
+          =' (' + f.mimetype + '; length: ' + f.length + ') '
+          a(href='/file/delete/' + f.id) del

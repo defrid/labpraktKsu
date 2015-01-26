@@ -1,0 +1,12 @@
+(function(window, angular) {
+    'use strict';
+    return angular.module('edm', [
+        'edm.config',
+        'ui.router',
+        'LocalStorageModule',
+        'ngResource',
+        'ngTable'
+        ]
+    );
+})(window, window.angular);
+

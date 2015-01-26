@@ -1,0 +1,77 @@
+var url = require('url');
+
+var express = require('express');
+var http = require('http');
+
+var config = null;
+
+// conf = {
+//   link: 'http://localhost:8083/data/v1/opdata/src-test'}
+module.exports = function(conf) {
+  config = conf;
+  var router = express.Router();
+  createRoutes(router);
+  return router;
+};
+
+function createRoutes(router) {
+  router.get('/get', function(req, res) {getFilesList(res);});
+}
+
+function getFilesList(res) {
+  console.log('Getting files from service...');
+  var parsedUrl = url.parse(config.getServiceEndpoint("data-service-rd").credentials.uri);
+  var options = {
+    hostname: parsedUrl.hostname,
+    port:     parsedUrl.port,
+    path:     config.get("dataPath"),
+    method:   'GET',
+    headers:  {
+      'Connection': 'close'
+    }
+  };
+
+  console.log('options: ' + JSON.stringify(options));
+
+  var req = http.request(options, function(r){
+    console.log(r.statusCode + ' ' + http.STATUS_CODES[r.statusCode]);
+    console.log(JSON.stringify(r.headers));
+
+    res.set('Content-Type', 'application/json');
+    r.setEncoding('utf-8');
+    r.pipe(res);
+
+    /* res.on('data', function(c) {
+      params.err.descr += c;
+    });
+
+    res.on('end', function() {
+      if (res.statusCode >= 200 && res.statusCode < 300) {
+        params.err.error = 0;
+      } else {
+        params.err.error = -1;
+        params.err.descr = http.STATUS_CODES[res.statusCode];
+      }
+      cb(params.err);
+    }); */
+  });
+
+  req.on('error', function(e) {
+    console.log(JSON.stringify(e));
+    res.send(e);
+    // res.send([]);
+    // params.err.error = -1;
+    // params.err.descr = e.code || e;
+    // cb(params.err);
+  });
+
+  // req.write(data);
+  req.end();
+
+
+  // just to simulate some delay;
+  // todo: remove from release version!;
+  /* setTimeout(function() {
+    res.send(JSON.stringify(files));
+  }, 1500); */
+};

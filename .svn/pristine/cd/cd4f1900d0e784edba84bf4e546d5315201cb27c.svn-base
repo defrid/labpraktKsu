@@ -1,0 +1,7 @@
+angular.module("edm.config", [])
+
+.constant("config", {
+	"appRootPath": "api"
+})
+
+;

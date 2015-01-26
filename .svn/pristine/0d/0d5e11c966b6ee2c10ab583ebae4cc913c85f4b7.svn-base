@@ -1,0 +1,366 @@
+var url = require('url');
+var express = require('express');
+var http = require('http');
+var fs = require('fs');
+// var path = require('path');
+// var tmpl = require('./third-party/tmpl/tmpl').tmpl;
+
+var options = null;
+
+
+
+// conf = {
+//   link: 'http://localhost:8083/data/v1/opdata/src-test'}
+exports = module.exports = function(opt) {
+  options = opt;
+  // checkTemplateFile();
+  var router = express.Router();
+  createRoutes(router);
+  return router;
+};
+
+exports.initUser = function(user) {
+  updateUserData(null, user);
+};
+
+function createRoutes(router) {
+  router.post('/save', function(req, res) {saveTraces(req, res);});
+  router.get('/get/:id', getTraceFile);
+  router.get('/list', getTraceList);
+  router.get('/del/:id', deleteTraceFile);
+  router.get('/opt', function(req, res) {
+    updateUserData(req.query, req.$user.user, res)
+  });
+};
+
+function changeTemplateFilename(src) {
+  return src.slice(0, src.lastIndexOf('.') + 1) + 'js';
+};
+
+/* function checkTemplateFile() {
+  // if file doesn't exist create it;
+  fs.stat(changeTemplateFilename(options.templateFile), function(e, s) {
+    if (e) {
+      console.log("Tracing framework initialization file " +
+        "couldn't be found. Creating it.");
+      updateUserData();
+    };
+  });
+}; */
+
+function updateUserData(query, user, res) {
+  if (query && query.reset) query = null;
+  user.wtf = {
+    format:           (query && query.format) || 'binary',
+    disableProviders: (query && query.disableProviders) || 1,
+    pDom:             (query && query.pDom) || 1,
+    pChromeDebug:     (query && query.pChromeDebug) || 0,
+    pWebworker:       (query && query.pWebworker) || 1,
+    pXhr:             (query && query.pXhr) || 1,
+    pImage:           (query && query.pImage) || 1,
+
+    // hud
+    hMode:            (query && query.hMode) || 'page',
+    hEndpoint:        (query && query.hEndpoint) ||
+                      '/js/wtf/wtf-app/app/maindisplay.html',
+
+    useHud:           Number((query && query.useHud) || 1),
+
+    enabled:          Number((query && query.wtfEnabled) || 1),
+
+    // headerDescr:      '// This is automatically generated script file.'
+  };
+
+  user.save();
+  if (res) res.send({error: 0, descr: "OK"});
+
+ /*  console.log("Loading template file: " + options.templateFile);
+  fs.readFile(options.templateFile, {encoding: "utf8"}, function(e, d) {
+    if (e) {
+      if (res) res.send({error: e.code, descr: e.message});
+      console.log('Error reading file: [' + e.code + '] ' + e.message);
+      return;
+    };
+
+    fs.writeFile(changeTemplateFilename(options.templateFile), tmpl(d, o), function(e) {
+      if (e) {
+        if (res) res.send({error: e.code, descr: e.message});
+        console.log('Error writing file: [' + e.code + '] ' + e.message);
+        return;
+      };
+
+      console.log('Template file has been generated.');
+      if (res) res.send({error: 0, descr: "OK"});
+    });
+  }); */
+};
+
+function getTraceList(req, res) {
+  console.log('Getting trace files from service...');
+  var parsedUrl = url.parse(options.config.
+    getServiceEndpoint("logging-service-rd").credentials.uri);
+
+  var o = {
+    hostname: parsedUrl.hostname,
+    port:     parsedUrl.port,
+    path:     options.config.get("tracePath"),
+    method:   'GET',
+    headers:  {
+      'Connection': 'close'
+    }
+  };
+
+  console.log('options: ' + JSON.stringify(o));
+
+  var sreq = http.request(o, function(r){
+    console.log(r.statusCode + ' ' + http.STATUS_CODES[r.statusCode]);
+    console.log(JSON.stringify(r.headers));
+
+    res.set('Content-Type', 'application/json');
+    r.setEncoding('utf-8');
+    r.pipe(res);
+
+  });
+
+  sreq.on('error', function(e) {
+    console.log(JSON.stringify(e));
+    res.send({error: e.code, descr: e.message});
+  });
+
+  sreq.end();
+
+  /*
+  console.log('Reading dir: ' + options.tracePath);
+  fs.readdir(options.tracePath, function(err, files) {
+    if (err) {
+      res.send({error: err.code, descr: err.message});
+      return;
+    };
+
+    console.log('Found: ' + files.length + ' file(s).');
+
+    files.sort();
+    files.reverse();
+    getStats(files = rearrangeFiles(files), function() {
+      res.send(JSON.stringify({error: err, files: files}));
+    });
+  });
+  */
+};
+
+function rearrangeFiles(arr) {
+  var result = [];
+  for (var i = 0; i < arr.length; ++i) {
+    result.push({name: arr[i], stats: {}});
+  };
+  return result;
+};
+
+function getStats(files, cb) {
+  var count = 0;
+  for (var i = 0; i < files.length; ++i) {
+    _getStats(files[i], function() {
+      count++;
+    });
+  };
+
+  function ready() {
+    if (count == files.length) cb();
+    else setTimeout(ready, 100);
+  };
+
+  ready();
+};
+
+function _getStats(file, cb) {
+  fs.stat(options.tracePath + '/' + file.name, function (e, stats) {
+    if (!e) file.stats = {
+      size:  stats.size,
+      ctime: stats.ctime
+    };
+    cb();
+  });
+};
+
+function getTraceFile(req, res) {
+  console.log('Getting trace file from service...');
+  var parsedUrl = url.parse(options.config.
+    getServiceEndpoint("logging-service-rd").credentials.uri);
+
+  var o = {
+    hostname: parsedUrl.hostname,
+    port:     parsedUrl.port,
+    path:     options.config.get("tracePath") + '?guid=' + req.params.id || 0,
+    method:   'GET',
+    headers:  {
+      'Connection': 'close'
+    }
+  };
+
+  console.log('options: ' + JSON.stringify(o));
+
+  var sreq = http.request(o, function(r){
+    console.log(r.statusCode + ' ' + http.STATUS_CODES[r.statusCode]);
+    console.log(JSON.stringify(r.headers));
+
+    if (r.statusCode < 200 || r.statusCode >= 400) res.status(r.statusCode);
+
+    // res.set('Content-Type', 'application/json');
+    // r.setEncoding('utf-8');
+    r.pipe(res);
+
+  });
+
+  sreq.on('error', function(e) {
+    console.log(JSON.stringify(e));
+    res.status(503).send({error: e.code, descr: e.message});
+  });
+
+  sreq.end();
+
+
+  /* var r = fs.createReadStream(options.tracePath + '/' + req.params.id);
+  r.on('open', function(fd) {
+    console.log('streaming from file '+ fd);
+    r.pipe(res);
+  });
+
+  r.on('error', function(e) {
+    console.log('getTraceFile: ' + e);
+    res.send(JSON.stringify({error: e.code, descr: e.message}));
+  }); */
+};
+
+function saveTraces(req, res) {
+  console.log('Saving a trace...');
+  var name = req.get('X-Filename');
+  // todo: validate the name;
+
+  var parsedUrl = url.parse(options.config.
+    getServiceEndpoint("logging-service-rd").credentials.uri);
+
+  var o = {
+    hostname: parsedUrl.hostname,
+    port:     parsedUrl.port,
+    path:     options.config.get("tracePath") + '/Post?filename=' + name || 'unknown',
+    method:   'POST',
+    headers: {
+      'Connection':     'close',
+      'Content-Type':   req.get('Content-Type'),
+      'Content-Length': req.get('Content-Length')
+    }
+  };
+
+  console.log('options: ' + JSON.stringify(o));
+
+  var err = {error: 0, descr: ''};
+  var sreq = http.request(o, function(sres) {
+    console.log(sres.statusCode + ' ' + http.STATUS_CODES[sres.statusCode]);
+    console.log(JSON.stringify(sres.headers));
+
+    sres.on('data', function(c) {
+      console.log('in sres.on("data")');
+      err.descr += c;
+    });
+
+    sres.on('end', function() {
+      console.log('in sres.on("end")');
+      if (sres.statusCode >= 200 && sres.statusCode < 400) {
+        err.error = 0;
+      } else {
+        err.error = sres.statusCode;
+        err.descr = http.STATUS_CODES[sres.statusCode];
+      }
+      res.send(err);
+    });
+  });
+
+  sreq.on('error', function(e) {
+    console.log('in sres.on("error")');
+    console.log(JSON.stringify(e));
+    err.error = e.code;
+    err.descr = e.message;
+    res.send(err);
+  });
+
+  req.on('data', function(d) {
+    console.log('in req.on("data")');
+    sreq.write(d);
+  });
+
+  req.on('end', function() {
+    console.log('in req.on("end")');
+    sreq.end();
+  });
+  // req.pipe(sreq);
+
+  // sreq.end();
+
+  /* var w = fs.createWriteStream(options.tracePath + '/' + name);
+  w.on('open', function(fd) {
+    console.log('streaming to file ' + fd);
+    req.pipe(w);
+  });
+
+  var ok = {error: 0, descr: "OK"};
+
+  w.on('error', function(e) {
+    console.log('saveTraces: ' + e);
+    ok.error = e.code;
+    ok.descr = e.message;
+    res.send(JSON.stringify(ok));
+  });
+
+  w.on('finish', function() {
+
+    res.send(JSON.stringify(ok));
+  }); */
+};
+
+function deleteTraceFile(req, res) {
+  console.log('Deleting trace file \'' + req.params.id + '\' from service...');
+  var parsedUrl = url.parse(options.config.
+    getServiceEndpoint("logging-service-rd").credentials.uri);
+
+  var o = {
+    hostname: parsedUrl.hostname,
+    port:     parsedUrl.port,
+    path:     options.config.get("tracePath") + '/Delete?guid=' + req.params.id || 0,
+    method:   'DELETE',
+    headers:  {
+      'Connection': 'close'
+    }
+  };
+
+  console.log('options: ' + JSON.stringify(o));
+
+  var err = {error: 0, descr: ''};
+  var sreq = http.request(o, function(r){
+    console.log(r.statusCode + ' ' + http.STATUS_CODES[r.statusCode]);
+    console.log(JSON.stringify(r.headers));
+
+    r.setEncoding('utf-8');
+    r.on('data', function(c) {
+      err.descr += c;
+    });
+
+    r.on('end', function() {
+      if (r.statusCode >= 200 && r.statusCode < 400) {
+        err.error = 0;
+      } else {
+        err.error = r.statusCode;
+        err.descr = http.STATUS_CODES[r.statusCode];
+      }
+      res.send(err);
+    });
+  });
+
+  sreq.on('error', function(e) {
+    console.log(JSON.stringify(e));
+    err.error = e.code;
+    err.descr = e.message;
+    res.send(err);
+  });
+
+  sreq.end();
+};

@@ -1,0 +1,35 @@
+{
+  "name":         "edm",
+  "appProtocol":  "http",
+  "appHost":      "localhost",
+  "appPort":     "9000",
+  "app":         "",
+  "exchange":    "monitorExchange",
+  "outputQueue": "output",
+  "pingTTL":     "5000",
+  "uploadPath":  "/api/v1/fdm",
+  "uploadAgent": "REDM client",
+  "dataPath":    "/data/v1/opdata/src-test",
+  "parserPath":  "/api/v1/Config",
+  "tracePath":   "/api/v1/Trace",
+  "auditPath":   "/api/v1/Audit",
+
+  "appServices": {
+    "user-provided": [
+      {"name": "opdata-api", "credentials": { "ContactPoints":"162.13.80.129,162.13.80.129", "Username":"cassandra", "Password":"cassandra", "Port":"9042" }},
+      {"name": "config-api", "credentials": { "ContactPoints":"162.13.80.129,162.13.80.129", "Username":"cassandra", "Password":"cassandra", "Port":"9042" }},
+      {"name": "fdm-api", "credentials": { "ContactPoints":"162.13.80.129,162.13.80.129", "Username":"cassandra", "Password":"cassandra", "Port":"9042" }},
+      {"name": "metadata-api", "credentials": { "ContactPoints":"162.13.80.129,162.13.80.129", "Username":"cassandra", "Password":"cassandra", "Port":"9042" }},
+      {"name": "gateway-http-service-rd", "credentials": { "uri": "http://gateway-http-service-rd.cfapps.io" }},
+      {"name": "data-service-rd", "credentials": { "uri": "http://data-service-rd.cfapps.io" }},
+      {"name": "connector-csv-service-rd", "credentials": { "uri": "http://connector-csv-service-rd.cfapps.io" }},
+      {"name": "logging-service-rd", "credentials": { "uri": "http://logging-service-rd.cfapps.io" }},
+      {"name": "audit-service-rd", "credentials": { "uri": "http://audit-service-rd.cfapps.io" }},
+      {"name": "mapping-service-rd", "credentials": { "uri": "http://mapping-service-rd.cfapps.io" }}
+
+    ],
+    "cloudamqp": [
+      {"name": "edm-bus", "credentials": { "uri": "amqp://vkwcvzql:KJOCMD855poBHH-mXnAEHWtf8wTHzUGE@white-salamander.rmq.cloudamqp.com/vkwcvzql" }}
+    ]
+  }
+}

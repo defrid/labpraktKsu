@@ -1,0 +1,72 @@
+var url = require('url');
+var express = require('express');
+// var cookieParser = require('cookie-parser');
+var fs = require('fs');
+var uuid = require('node-uuid');
+
+var options = null;
+
+// global list of users:
+// {id1: {userObject1}, id2: {userObject2}, ...};
+
+
+exports = module.exports = function(opt) {
+  options = opt;
+  init();
+  return function (req, res, next) {
+    var cookieUserId = "UserID";
+    var userId = req.cookies[cookieUserId];
+    var u;
+    if (!userId || !(u = users[userId])) {
+      res.cookie(cookieUserId, userId = uuid.v4());
+      u = users[userId] = initUser();
+      save();
+    };
+
+    req.$user = {id: userId, user: u};
+    next();
+  };
+};
+
+var users = exports.users = {};
+
+function init() {
+  fs.readFile(options.usersPath, {encoding: "utf8"}, function(e, d) {
+    if (e) {
+      console.log('Error reading file: [' + e.code + '] ' + e.message);
+      return;
+    };
+
+    try {
+      var o = JSON.parse(d);
+      for (var p in o) {
+        if (o.hasOwnProperty(p)) {
+          (users[p] = o[p]).save = save;
+        };
+      };
+    }
+    catch(e) {
+      console.log('Failed to parse: [' + e + ']');
+    };
+  });
+};
+
+function save() {
+  fs.writeFile(options.usersPath, JSON.stringify(users), function(e) {
+    if (e) {
+      console.log('Error writing file: [' + e.code + '] ' + e.message);
+      return;
+    };
+    console.log('User file has been saved.');
+  });
+};
+
+function initUser() {
+  var u = {};
+  u.save = function() {};
+  for (var i = 0; i < options.modules.length; ++i) {
+    options.modules[i].initUser(u);
+  };
+  u.save = save;
+  return u;
+};

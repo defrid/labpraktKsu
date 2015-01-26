@@ -1,0 +1,153 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>REDM</title>
+  <base href="/">
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width">
+  <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+  <!-- build:css(app/client) styles/vendor.css -->
+  <!-- bower:css -->
+  <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css" />
+  <link rel="stylesheet" href="bower_components/components-font-awesome/css/font-awesome.css" />
+  <link rel="stylesheet" href="bower_components/datatables/media/css/jquery.dataTables.css" />
+  <link rel="stylesheet" href="bower_components/font-awesome/css/font-awesome.css" />
+  <link rel="stylesheet" href="bower_components/metisMenu/dist/metisMenu.css" />
+  <link rel="stylesheet" href="bower_components/morrisjs/morris.css" />
+  <link rel="stylesheet" href="bower_components/datatables-responsive/css/dataTables.responsive.css" />
+  <link rel="stylesheet" href="bower_components/bootstrap-social/bootstrap-social.css" />
+  <link rel="stylesheet" href="bower_components/startbootstrap-sb-admin-2/dist/css/sb-admin-2.css" />
+  <link rel="stylesheet" href="bower_components/ng-table/dist/ng-table.min.css" />
+  <!-- endbower -->
+  <link rel="stylesheet" href="scripts/vendors/SlickGrid/slick-default-theme.css" />
+  <link rel="stylesheet" href="scripts/vendors/SlickGrid/slick.grid.css" />
+  <link rel="stylesheet" href="scripts/vendors/SlickGrid/controls/slick.columnpicker.css" />
+  <!-- endbuild -->
+  <!-- build:css(app/.tmp) styles/main.css -->
+  <link rel="stylesheet" href="bower_components/jquery-ui/themes/smoothness/jquery-ui.css" />
+  <link rel="stylesheet" href="styles/main.css">
+  <!-- endbuild -->
+
+</head>
+<body ng-app="edm">
+    <div id="wrapper" ui-view></div>
+
+  <!--[if lt IE 9]>
+  <!-- build:js(app/client) scripts/ie.js -->
+
+  <!-- endbuild -->
+  <!--[endif]-->¡
+
+
+  <!-- build:js(app/client) scripts/vendor.js -->
+  <!-- bower:js -->
+  <script src="bower_components/jquery/dist/jquery.js"></script>
+  <script src="bower_components/angular/angular.js"></script>
+  <script src="bower_components/angular-resource/angular-resource.js"></script>
+  <script src="bower_components/angular-ui-router/release/angular-ui-router.js"></script>
+  <script src="bower_components/angular-local-storage/dist/angular-local-storage.js"></script>
+  <script src="bower_components/bootstrap/dist/js/bootstrap.js"></script>
+  <script src="bower_components/datatables/media/js/jquery.dataTables.js"></script>
+  <script src="bower_components/flot/jquery.flot.js"></script>
+  <script src="bower_components/holderjs/holder.js"></script>
+  <script src="bower_components/metisMenu/dist/metisMenu.js"></script>
+  <script src="bower_components/raphael/raphael.js"></script>
+  <script src="bower_components/mocha/mocha.js"></script>
+  <script src="bower_components/morrisjs/morris.js"></script>
+  <script src="bower_components/datatables-responsive/js/dataTables.responsive.js"></script>
+  <script src="bower_components/flot.tooltip/js/jquery.flot.tooltip.js"></script>
+  <script src="bower_components/startbootstrap-sb-admin-2/dist/js/sb-admin-2.js"></script>
+  <script src="bower_components/jquery-ui/jquery-ui.js"></script>
+  <script src="bower_components/ng-table/dist/ng-table.min.js"></script>
+  <!-- endbower -->
+  <!-- endbuild -->
+
+  <!-- build:js({app/.tmp,app/client}) scripts/scripts.js -->
+  <!-- inject:js -->
+
+
+  <script src="scripts/slick/editors/validators/pattern-validate.js"></script>
+
+
+  <script src="scripts/slick/editors/validators/integer-validate.js"></script>
+
+
+  <script src="scripts/slick/editors/validators/function-validate.js"></script>
+
+
+  <script src="scripts/slick/editors/base-editor.js"></script>
+
+
+  <script src="scripts/app.js"></script>
+
+
+  <script src="scripts/services/session-service.js"></script>
+
+
+  <script src="scripts/services/auth-service.js"></script>
+
+
+  <script src="scripts/models/user.js"></script>
+
+
+  <script src="scripts/directives/resize.js"></script>
+
+
+  <script src="scripts/controllers/parsercfg.js"></script>
+
+
+  <script src="scripts/controllers/main-controller.js"></script>
+
+
+  <script src="scripts/controllers/logview.js"></script>
+
+
+  <script src="scripts/controllers/login-controller.js"></script>
+
+
+  <script src="scripts/controllers/file-upload.js"></script>
+
+
+  <script src="scripts/controllers/browse-controller.js"></script>
+
+
+  <script src="scripts/controllers/auditview.js"></script>
+
+
+  <script src="scripts/routes.js"></script>
+
+
+  <script src="scripts/development.js"></script>
+
+
+  <script src="scripts/config.js"></script>
+
+
+  <!-- endinject -->
+    <script src="scripts/vendors/SlickGrid/jquery.event.drag-2.2.js"></script>
+    <script src="scripts/vendors/SlickGrid/jquery.event.drop-2.2.js"></script>
+    <script src="scripts/vendors/SlickGrid/slick.core.js"></script>
+    <script src="scripts/vendors/SlickGrid/slick.grid.js"></script>
+    <script src="scripts/vendors/SlickGrid/slick.dataview.js"></script>
+    <script src="scripts/vendors/SlickGrid/slick.editors.js"></script>
+    <script src="scripts/vendors/SlickGrid/custom/slick.customeditors.js"></script>
+    <script src="scripts/vendors/SlickGrid/slick.formatters.js"></script>
+    <script src="scripts/vendors/SlickGrid/slick.groupitemmetadataprovider.js"></script>
+    <script src="scripts/vendors/SlickGrid/controls/slick.columnpicker.js"></script>
+    <script src="scripts/vendors/SlickGrid/plugins/slick.cellrangeselector.js"></script>
+    <script src="scripts/vendors/SlickGrid/plugins/slick.cellrangedecorator.js"></script>
+    <script src="scripts/vendors/SlickGrid/plugins/slick.cellselectionmodel.js"></script>
+    <script src="scripts/vendors/SlickGrid/plugins/slick.cellexternalcopymanager.js"></script>
+
+  <!-- endbuild -->
+
+  <!-- build:js(.) scripts/views.js -->
+  <!-- views:js -->
+  <!-- Here will be applied templates -->
+  <!-- endinject -->
+  <!-- endbuild -->
+
+</body>
+</html>
+
