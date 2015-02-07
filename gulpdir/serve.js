@@ -4,11 +4,8 @@ var browserSync    = require('browser-sync'),
     httpProxy      = require('http-proxy'),
     modRewrite     = require('connect-modrewrite'),
     $ = require('gulp-load-plugins')(),
-    appConfig      = require('../config/pivotal-config.json'),
     proxyApi = httpProxy.createProxyServer({
-        target : appConfig.appProtocol + '://' +
-            appConfig.appHost + ':' +
-            appConfig.appPort
+        target : 'http://localhost:9000'
     }),
     runSequence = require('run-sequence');
 

@@ -1,7 +1,6 @@
 var $ = require('gulp-load-plugins')(),
     gulp = require('gulp'),
-    appConfig = require('../config/pivotal-config.json'),
-    applicationName = appConfig.name,
+    applicationName = "labPract",
     runSequence = require('run-sequence');
 
 function onError(err) {
