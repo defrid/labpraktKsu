@@ -1,7 +1,7 @@
 (function(window, angular, _) {
     'use strict';
 
-    angular.module('labpract')
+    angular.module('labPract')
         .service('AuthService',
             function($http, $q, $rootScope, $state, config, SessionService, User) {
                 var self = this;

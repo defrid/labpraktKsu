@@ -1,4 +1,4 @@
-angular.module("labpract.config", [])
+angular.module("labPract.config", [])
 
 .constant("config", {
 	"appProtocol": "http",

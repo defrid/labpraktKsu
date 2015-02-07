@@ -29,7 +29,7 @@ function proxy(req, res, next) {
 proxyApi.on('error', onError);
 
 gulp.task('serve-deps', function(cb){
-    runSequence('wiredep', 'scripts', 'inject', 'views', 'styles', 'watch', cb);
+    runSequence('sprite', 'wiredep', 'scripts', 'inject', 'views', 'styles', 'watch', cb);
 });
 gulp.task('serve', ['serve-deps'], function () {
     browserSync({

@@ -11,6 +11,6 @@
                                 input.form-control(placeholder='Login', name='login', type='text', autofocus='', ng-model="credentials.login" )
                             .form-group
                                 input.form-control(placeholder='Password', name='password', type='password', value='', ng-model="credentials.password")
-                            a.btn.btn-lg.btn-success.btn-block(href="#", ng-click="login(LoginForm)") Login
+                            button.btn.btn-lg.btn-success.btn-block(type='submit', ng-click="login(LoginForm)") Login
                             | {{ errors }}
 

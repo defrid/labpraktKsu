@@ -1,7 +1,7 @@
 (function(window, angular, _) {
     'use strict';
 
-    var app = angular.module('labpract');
+    var app = angular.module('labPract');
 
     app.service('SessionService', function($location, localStorageService) {
         var USER          = 'currentUser';

@@ -1,5 +1,5 @@
 (function () {
-    var app = angular.module('edm');
+    var app = angular.module('labPract');
 
     app.directive('resize', function ($window) {
         return function (scope, element) {

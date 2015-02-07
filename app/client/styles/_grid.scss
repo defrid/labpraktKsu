@@ -4,6 +4,10 @@
     //height: 300px;
 }
 
+.grid-wrapper {
+    height: 100%;
+}
+
 
 input.editor-text {
     width: 100%;
@@ -54,4 +58,8 @@ input.editor-text {
 
 .slick-group-container {
     display: inline-block;
+}
+
+.modal-backdrop{
+    height: 100%;
 }

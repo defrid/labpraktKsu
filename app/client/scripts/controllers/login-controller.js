@@ -1,7 +1,7 @@
 (function(window, angular) {
     'use strict';
     var module;
-    module = angular.module("edm");
+    module = angular.module("labPract");
     module.controller("LoginController", function($scope, $state, AuthService) {
         $scope.credentials = {
             login: '',

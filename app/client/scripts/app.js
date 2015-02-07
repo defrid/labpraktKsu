@@ -1,11 +1,10 @@
 (function(window, angular) {
     'use strict';
-    return angular.module('labpract', [
-        'labpract.config',
+    return angular.module('labPract', [
+        'labPract.config',
         'ui.router',
         'LocalStorageModule',
-        'ngResource'
-        ]
-    );
+        'ngResource',
+        'ui.bootstrap',
+    ]);
 })(window, window.angular);
-

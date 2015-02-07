@@ -1,5 +1,5 @@
 {
-  "name": "edm.config",
+  "name": "labPract.config",
   "constants": {
     "config": {
       "appRootPath": "api"

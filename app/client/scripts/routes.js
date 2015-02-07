@@ -1,6 +1,6 @@
 (function(window, angular) {
     'use strict';
-    return angular.module('labpract')
+    return angular.module('labPract')
         .config(function($stateProvider, $urlRouterProvider, $locationProvider) {
             $locationProvider.html5Mode(true);
             $urlRouterProvider.otherwise('/');
@@ -12,6 +12,11 @@
                 })
                 .state('main.start', {
                     url: '/'
+                })
+                .state('main.files', {
+                    url: '/files',
+                    templateUrl: 'views/partials/files.html',
+                    controller: 'fileUploadCtrl'
                 })
                 .state('login', {
                     url: '/login',
