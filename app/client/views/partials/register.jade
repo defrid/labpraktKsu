@@ -1,0 +1,39 @@
+.container
+    .row
+        .col-md-4.col-md-offset-4
+            .login-panel.panel.panel-primary
+                .panel-heading
+                    h3.panel-title Пожалуйста, зарегистрируйтесь
+                .panel-body
+                     form(role='form', name='RegisterForm')
+                        fieldset
+                            .form-group
+                                h3.panel-title 
+                                input.form-control(placeholder='Имя', name='Имя', type='text', autofocus='', ng-model="credentials.login" )
+
+                            .form-group
+                                h3.panel-title Фамилия
+                                input.form-control(placeholder='Фамилия', name='Фамилия', type='Фамилия', value='', ng-model="credentials.password")
+
+                            .form-group 
+                                h3.panel-title Отчество
+                                input.form-control(placeholder='Отчество', name='Отчество', type='Отчество', value='', ng-model="credentials.password")
+
+                            .form-group 
+                                h3.panel-title Статус
+                                
+                                select.form-control
+                                    option Студент
+                                    option Преподаватель
+
+                            .form-group
+                                h3.panel-title Форма обучения
+                                 select.form-control
+                                    option Очная
+                                    option Заочная
+
+                            button.btn.btn-lg.btn-success.btn-block(type='submit', ng-click="Register(RegisterForm)") Регистрация
+                            | {{ errors }}
+
+
+
