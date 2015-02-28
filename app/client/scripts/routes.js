@@ -23,8 +23,6 @@
                     templateUrl: 'views/partials/login.html',
                     controller: "LoginController"
                 })
-                //сюда надо добавить роут на регистрацию
-                //контроллер я тебе создал, вьюшка тоже есть
                 .state('register', {
                     url: '/register',
                     templateUrl: 'views/partials/register.html',
