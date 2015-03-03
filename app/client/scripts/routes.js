@@ -28,7 +28,10 @@
                     templateUrl: 'views/partials/register.html',
                     controller: "RegisterController"
                 })
-            ;
+                .state('main.userList', {
+                    url: '/user-list',
+                    templateUrl: 'views/partials/user-list.html',
+                    controller: "UserListController"
+                });
         });
 })(window, window.angular);
-

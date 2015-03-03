@@ -4,7 +4,7 @@
     module = angular.module("labPract");
     module.controller("RegisterController", function($scope, $state, AuthService) {
 
-        $scope.studyMode = [ {
+        $scope.studyMode = [{
             id: 1,
             m_name: "Очная"
         }, {
@@ -22,7 +22,7 @@
             mode: 1
         }
 
-        $scope.register = function (RegisterForm) {
+        $scope.register = function(RegisterForm) {
 
             if (RegisterForm.$invalid) {
                 alert("Проверьте правильность ввода формы");
@@ -41,7 +41,7 @@
 
 
         ///////////////////////////ТЕСТОВЫЙ ПРИМЕР
-        $scope.data = [ {
+        $scope.data = [{
             odin: 1,
             dva: 2,
             tri: 3,
@@ -51,22 +51,21 @@
             dva: "two",
             tri: "three",
             chetire: "four"
-        }
-        ];
+        }];
 
-        $scope.buttonClick = function (element) {
+        $scope.buttonClick = function(element) {
             alert(element.odin + ", " + element.dva);
         }
 
-/*  во что разворачивается ng-repeat(ну тип того)
-        for (var i = 0 ; i < studyMode.legnth; i++) {
-            var mode = studyMode[i];
+        /*  во что разворачивается ng-repeat(ну тип того)
+                for (var i = 0 ; i < studyMode.legnth; i++) {
+                    var mode = studyMode[i];
 
-            value = mode.id;
+                    value = mode.id;
 
-            чевыводится = mode.m_name;
-        }
-*/
+                    чевыводится = mode.m_name;
+                }
+        */
 
 
     });
