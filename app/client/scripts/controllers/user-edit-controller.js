@@ -2,8 +2,7 @@
     'use strict';
     var module;
     module = angular.module("labPract");
-    module.controller("UserListController", function($scope, $state) {
-
+    module.controller("UserEditController", function($scope, $state, $stateParams) {
         $scope.users = [{
             id: 1,
             user_name: "Иванцов",
@@ -24,15 +23,22 @@
             mode: 1
         }];
 
-        $scope.buttonClick_change = function(user) {
-            $state.go('main.userEdit', {
-                user_id: user.id
-            });
-        }
+        $scope.currentUser = null;
+        $scope.user_id = $stateParams.user_id;
 
-        $scope.buttonClick_delete = function(user) {
-            alert(user.user_name + ", запись удалена");
-        }
+        $scope.GetUserById = function (id) {
+            //здесь идёт обращение к базе за юзером, поиск идёт по id
+            for (var i = $scope.users.length - 1; i >= 0; i--) {
+                if ($scope.users[i].id == id) {
+                    $scope.currentUser = angular.copy($scope.users[i]);
+                }
+            };
+        };
+
+        $scope.GetUserById($scope.user_id);
+
+
+
 
 
     });

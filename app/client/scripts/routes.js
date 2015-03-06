@@ -28,6 +28,11 @@
                     templateUrl: 'views/partials/register.html',
                     controller: "RegisterController"
                 })
+                .state('main.userEdit', {
+                    url: '/user-edit/:user_id',
+                    templateUrl: 'views/partials/user-edit.html',
+                    controller: "UserEditController"
+                })
                 .state('main.userList', {
                     url: '/user-list',
                     templateUrl: 'views/partials/user-list.html',

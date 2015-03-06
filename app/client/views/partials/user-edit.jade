@@ -1,0 +1,20 @@
+.container
+    .row
+        div.table-responsive
+            table.table.table-striped.table-bordered.table-hover
+                thead
+                    tr
+                        td Фамилия
+                        td Имя
+                        td Отчество
+                        td e-mail
+                        td Тип
+                        td Дата добавления
+                tbody
+                    tr
+                        td {{currentUser.user_name}}
+                        td {{currentUser.user_lastname}}
+                        td {{currentUser.user_surname}}
+                        td {{currentUser.email}}
+                        td {{currentUser.date_create}}
+                        td {{currentUser.date_change}}

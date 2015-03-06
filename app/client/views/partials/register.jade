@@ -37,19 +37,3 @@
                                     option(ng-repeat="mode in studyMode", value="{{mode.id}}") {{mode.m_name}}
 
                             button.btn.btn-lg.btn-success.btn-block(type='submit', ng-click="register(RegisterForm)") Регистрация
-                    table.table
-                        thead
-                            tr
-                                td odin
-                                td dva
-                                td tri
-                                td 4etire
-                                td button
-                        tbody
-                            tr(ng-repeat="element in data")
-                                td {{element.odin}}
-                                td {{element.dva}}
-                                td {{element.tri}}
-                                td {{element.chetire}}
-                                td 
-                                    button.btn.btn-default(ng-click="buttonClick(element)") Редактировать
