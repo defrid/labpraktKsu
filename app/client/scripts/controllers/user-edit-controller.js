@@ -3,7 +3,7 @@
     var module;
     module = angular.module("labPract");
     module.controller("UserEditController", function($scope, $state, $stateParams) {
-        $scope.users = [{
+        $scope.users = [{//а здесь лежит гребаный массив тестовый
             id: 1,
             user_name: "Иванцов",
             user_lastname: "Иван",
@@ -23,7 +23,7 @@
             mode: 1
         }];
 
-        $scope.currentUser = null;
+        $scope.currentUser = null;//вот твоя модель, вот здесь лежит юзер
         $scope.user_id = $stateParams.user_id;
 
         $scope.GetUserById = function (id) {
@@ -36,6 +36,14 @@
         };
 
         $scope.GetUserById($scope.user_id);
+
+         $scope.buttonClick_save = function(currentUser) {
+            $state.go('main.userList');
+        }
+
+        $scope.buttonClick_cancel = function(currentUser) {
+            $state.go('main.userList');
+        }
 
 
 

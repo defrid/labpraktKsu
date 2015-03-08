@@ -33,10 +33,17 @@
                     templateUrl: 'views/partials/user-edit.html',
                     controller: "UserEditController"
                 })
+                 
                 .state('main.userList', {
                     url: '/user-list',
                     templateUrl: 'views/partials/user-list.html',
                     controller: "UserListController"
+                })
+
+                .state('main.userAdd', {
+                    url: '/user-add',
+                    templateUrl: 'views/partials/user-add.html',
+                    controller: "UserAddController"
                 });
         });
 })(window, window.angular);
