@@ -4,6 +4,10 @@ var session = require('express-session')
 
 var fileUpload = require('./app/controllers/file-upload');
 
+var server_port = process.env.OPENSHIFT_NODEJS_PORT || 9000;
+var server_ip_address = process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1';
+
+
 app.set('view engine', 'jade');
 
 // Routes
@@ -80,6 +84,6 @@ app.get(['^/?[^\\.]*$'], function(req, res) {
 });
 
 
-server = app.listen(9000, function() {
-  console.log('Listening on port %d', server.address().port);
+server = app.listen(server_port, server_ip_address, function(){
+  console.log("Listening on " + server_ip_address + ", server_port " + server_port)
 });
