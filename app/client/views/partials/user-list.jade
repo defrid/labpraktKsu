@@ -3,7 +3,7 @@
         div.table-responsive
             div.panel.panel-default
                 div.panel-heading База зарегистрированных пользователей
-                    button.btn.btn-default(ng-click="buttonClick_add(element)") Добавить           
+                    button.btn.btn-default(ng-click="buttonClick_add()") Добавить           
                 div.panel-body
                     table.table.table-striped.table-bordered.table-hover
                         thead
@@ -12,19 +12,19 @@
                                 th Имя
                                 th Отчество
                                 th e-mail
-                                th Тип
                                 th Дата добавления
+                                th Дата изменения
                                 
                         tbody
-                            tr(ng-repeat="element in user")
-                                td {{element.user_lastname}}
-                                td {{element.user_name}}
-                                td {{element.user_surname}}
-                                td {{element.email}}
-                                td {{element.date_create}}
-                                td {{element.date_change}}
+                            tr(ng-repeat="user in userList")
+                                td {{user.user_lastname}}
+                                td {{user.user_name}}
+                                td {{user.user_surname}}
+                                td {{user.email}}
+                                td {{user.date_create}}
+                                td {{user.date_change}}
                                 td 
-                                    button.btn.btn-default(ng-click="buttonClick_change(element)") Редактировать
-                                    button.btn.btn-default(ng-click="buttonClick_delete(element)") Удалить
+                                    button.btn.btn-default(ng-click="buttonClick_change(user)") Редактировать
+                                    button.btn.btn-default(ng-click="buttonClick_delete(user)") Удалить
                  
             

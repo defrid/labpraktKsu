@@ -4,14 +4,15 @@ var session = require('express-session')
 
 var fileUpload = require('./app/controllers/file-upload');
 
+var admin = require('./app/controllers/admin');
+
 var server_port = process.env.OPENSHIFT_NODEJS_PORT || 9000;
 var server_ip_address = process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1';
 
 
 app.set('view engine', 'jade');
 
-// Routes
-app.use('/api/files', fileUpload());
+
 
 app.use(session({
   secret: 'keyboard cat',
@@ -26,6 +27,10 @@ app.use(bodyParser.json()); // to support JSON-encoded bodies
 app.use(bodyParser.urlencoded({ // to support URL-encoded bodies
   extended: true
 }));
+
+// Routes
+app.use('/api/files', fileUpload());
+app.use('/api/admin', admin());
 
 function current_user(req) {
   if (req.session.user_login) {

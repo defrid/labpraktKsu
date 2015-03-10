@@ -2,52 +2,52 @@
     'use strict';
     var module;
     module = angular.module("labPract");
-    module.controller("UserEditController", function($scope, $state, $stateParams) {
-        $scope.users = [{//а здесь лежит гребаный массив тестовый
-            id: 1,
-            user_name: "Иванцов",
-            user_lastname: "Иван",
-            user_surname: "Иванович",
-            email: "аврвар@",
-            date_create: "",
-            date_change: "",
-            mode: 1
-        }, {
-            id: 2,
-            user_name: "Ровамнов",
-            user_lastname: "Роман",
-            user_surname: "Рованович",
-            email: "пврвр@",
-            date_create: "",
-            date_change: "",
-            mode: 1
-        }];
+    module.controller("UserEditController", function($scope, $state, $stateParams, $http) {
 
-        $scope.currentUser = null;//вот твоя модель, вот здесь лежит юзер
+        $scope.currentUser = null;
         $scope.user_id = $stateParams.user_id;
 
-        $scope.GetUserById = function (id) {
-            //здесь идёт обращение к базе за юзером, поиск идёт по id
-            for (var i = $scope.users.length - 1; i >= 0; i--) {
-                if ($scope.users[i].id == id) {
-                    $scope.currentUser = angular.copy($scope.users[i]);
+        $scope.GetUserById = function(id) {
+            var options = {
+                method: 'POST',
+                url: '/api/admin/GetUser',
+                data: {
+                    user_id: id
                 }
             };
+
+
+            $http(options)
+                .success(function(data, status, headers) {
+                    $scope.currentUser = angular.copy(data);
+                })
+                .error(function(error, status, headers) {
+                    alert("Ошибка");
+                })
         };
 
         $scope.GetUserById($scope.user_id);
 
-         $scope.buttonClick_save = function(currentUser) {
-            $state.go('main.userList');
+        $scope.buttonClick_save = function(EditForm) {
+
+            var options = {
+                method: 'POST',
+                url: '/api/admin/EditUser',
+                data: $scope.currentUser
+            };
+
+            $http(options)
+                .success(function(data, status, headers) {
+                    $state.go('main.userList');
+                })
+                .error(function(error, status, headers) {
+                    alert("Ошибка");
+                })
         }
 
-        $scope.buttonClick_cancel = function(currentUser) {
+        $scope.buttonClick_cancel = function() {
             $state.go('main.userList');
         }
-
-
-
-
 
     });
 })(window, window.angular);
