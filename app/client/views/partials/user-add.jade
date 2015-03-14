@@ -3,7 +3,7 @@
         div.panel.panel-default
             div.panel-heading Добавить пользователя
             div.panel-body
-                     form.css-form(role='form', name='EditForm', novalidate)
+                     form.css-form(role='form', name='addForm', novalidate)
                         fieldset
                             .form-group
                                 h3.panel-title Фамилия
@@ -21,5 +21,5 @@
                                 h3.panel-title E-mail
                                 input.form-control(placeholder='E-mail', name='e-mail', type='email', ng-model="currentUser.email", required)
 
-                            button.btn.btn-default(ng-click="buttonClick_save(EditForm)") Сохранить
-                            button.btn.btn-default(ng-click="buttonClick_cancel(EditForm)") Отмена
+                            button.btn.btn-default(ng-click="buttonClick_save(addForm)") Сохранить
+                            button.btn.btn-default(ng-click="buttonClick_cancel(addForm)") Отмена

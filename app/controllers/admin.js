@@ -24,6 +24,7 @@ function createRoutes(router) {
     router.get('/GetUserList', GetUserList);
     router.post('/GetUser', GetUser);
     router.post('/EditUser', EditUser);
+    router.post('/SaveUser', SaveUser);
 };
 
 var list = [{
@@ -80,6 +81,18 @@ function EditUser(request, response) {
 }
 
 
+function SaveUser(request, response) {
+    var newUser = request.body;
+
+    var result = CreateUser(newUser);
+
+    if (result > 0) 
+        response.send(200);
+    else
+        response.send(500);
+
+}
+
 
 
 //типа здесь база данных
@@ -93,6 +106,7 @@ function GetUserById(id) {
     //закончилось обращение к базе, в переменной usser находится то что вернула база
 }
 
+
 //типа здесь база данных
 function SaveUserById(editedUser) {
     editedUser.date_change = new Date().toString();
@@ -105,4 +119,16 @@ function SaveUserById(editedUser) {
     };
     return false;
     //закончилось обращение к базе, в переменной usser находится то что вернула база
+}
+
+
+//база, возвращает id новог пользовтеля или -1
+function CreateUser(user) {
+    user.date_create = new Date();
+
+    user.id = list.length + 1;
+
+    return list.push(user);
+
+
 }

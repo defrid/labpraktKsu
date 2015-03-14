@@ -30,6 +30,10 @@
 
         $scope.buttonClick_save = function(EditForm) {
 
+            if(EditForm.$invalid) {
+                return alert("Повторите ввод");
+            }
+            
             var options = {
                 method: 'POST',
                 url: '/api/admin/EditUser',
@@ -44,6 +48,8 @@
                     alert("Ошибка");
                 })
         }
+
+        
 
         $scope.buttonClick_cancel = function() {
             $state.go('main.userList');
