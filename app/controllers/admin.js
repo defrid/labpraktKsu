@@ -4,6 +4,8 @@ var url = require('url');
 var express = require('express');
 var cookieParser = require('cookie-parser');
 
+//var adminBase = require('./base/admin-base');
+
 
 // import filesystem
 var fs = require('fs');
@@ -86,7 +88,7 @@ function SaveUser(request, response) {
 
     var result = CreateUser(newUser);
 
-    if (result > 0) 
+    if (result > 0)
         response.send(200);
     else
         response.send(500);
