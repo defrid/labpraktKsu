@@ -4,19 +4,75 @@
     module = angular.module("labPract");
     module.controller("UserListController", function($scope, $state, $http) {
 
-        $scope.userList = [];
+        $scope.userList = []; //полный список
+
+        $scope.displayList = []; //отображаемый список
+
+        $scope.curPage = 0; //текущая страница
+
+        $scope.count = 2; //количество отображаемых элементов
+
+        /*
+            request
+            {
+                curPage: number,
+                count: number
+            }
+
+            response
+            {
+                curPage: number,
+                count: number,
+                lastPage: number,
+                list: [массив со списком на текущуцю страницу]
+            }
+        */
 
         $scope.getList = function() {
-            $http.get('/api/admin/GetUserList')
+            var request = {
+                url: '/api/admin/getPagedList',
+                method: 'POST',
+                data: {
+                    curPage: $scope.curPage,
+                    count: $scope.count
+                }
+            }
+
+            $http(request)
                 .success(function(data, status, headers) {
-                    $scope.userList = angular.copy(data);
+                    $scope.displayList = data.list;
+                    $scope.lastPage = data.lastPage;
+
                 })
                 .error(function(error, status, headers) {
                     alert("Ошибка");
                 })
         }
-
         $scope.getList();
+
+
+
+
+
+
+        $scope.buttonNext_page = function() {
+            if ($scope.lastPage == $scope.curPage) {
+                return;
+            }
+
+            $scope.curPage++;
+            //запрос
+            $scope.getList();
+        }
+
+        $scope.buttonPrevious_page = function() {
+            if ($scope.curPage == 0) {
+                return;
+            }
+            $scope.curPage--;
+            //запрос
+            $scope.getList();
+        }
 
         $scope.buttonClick_change = function(user) {
             $state.go('main.userEdit', {

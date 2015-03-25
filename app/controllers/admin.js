@@ -27,6 +27,9 @@ function createRoutes(router) {
     router.post('/GetUser', GetUser);
     router.post('/EditUser', EditUser);
     router.post('/SaveUser', SaveUser);
+    //роут на задание
+    router.post('/getPagedList', GetPagedList);
+
 };
 
 var list = [{
@@ -46,6 +49,15 @@ var list = [{
     date_create: "",
     date_change: ""
 }];
+
+/*
+var res = {
+    curPage: что пришло в request,
+    count: что пришло в request,
+    lastPage: вычислить,
+    list: вырезать из массива list на сервере(см.выше)
+}
+*/
 
 //request - запрос, response - что мы в ответ пишем
 function GetUserList(request, response) {
@@ -93,6 +105,28 @@ function SaveUser(request, response) {
     else
         response.send(500);
 
+}
+
+//универсальная функция, которая принимает страницу и количество
+//и возвращает обратно список на текущую страницу
+function GetPagedList(request, response) {
+    var body = request.body;
+
+    var res = {
+        curPage: body.curPage,
+        count: body.count,
+        lastPage: Math.round(list.length / body.count - 1),
+        list: list.slice(body.count * body.curPage, body.count * body.curPage + body.count),
+    };
+
+    response.send(res);
+    /*
+    var res = {
+        curPage: что пришло в request,
+        count: что пришло в request,
+        lastPage: вычислить,
+        list: вырезать из массива list на сервере(см.выше)
+    }*/
 }
 
 

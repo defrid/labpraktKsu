@@ -16,7 +16,7 @@
                                 th Дата изменения
                                 
                         tbody
-                            tr(ng-repeat="user in userList")
+                            tr(ng-repeat="user in displayList")
                                 td {{user.user_lastname}}
                                 td {{user.user_name}}
                                 td {{user.user_surname}}
@@ -26,5 +26,9 @@
                                 td 
                                     button.btn.btn-default(ng-click="buttonClick_change(user)") Редактировать
                                     button.btn.btn-default(ng-click="buttonClick_delete(user)") Удалить
+
+                        button.btn.btn-default(ng-disabled="curPage == 0", ng-click="buttonPrevious_page()") Предыдущая
+                        button.btn.btn-default(ng-disabled="lastPage == curPage", ng-click="buttonNext_page()") Следующая
+
                  
             
