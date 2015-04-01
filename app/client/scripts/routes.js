@@ -45,5 +45,7 @@
                     templateUrl: 'views/partials/user-add.html',
                     controller: "UserAddController"
                 });
+
+                
         });
 })(window, window.angular);

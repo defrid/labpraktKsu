@@ -29,6 +29,7 @@ function createRoutes(router) {
     router.post('/SaveUser', SaveUser);
     //роут на задание
     router.post('/getPagedList', GetPagedList);
+    router.post('/getNumb', getNumb);
 
 };
 
@@ -49,6 +50,15 @@ var list = [{
     date_create: "",
     date_change: ""
 }];
+
+
+
+function getNumb(request, response) {
+    var numb = request.body;
+    console.log(numb);
+    response.send(numb);
+    
+}
 
 /*
 var res = {
@@ -168,3 +178,11 @@ function CreateUser(user) {
 
 
 }
+
+
+
+//_______________________________________________________
+
+
+
+

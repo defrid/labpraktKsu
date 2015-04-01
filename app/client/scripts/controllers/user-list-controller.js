@@ -12,6 +12,34 @@
 
         $scope.count = 2; //количество отображаемых элементов
 
+
+        //__________________________________________________________
+
+        $scope.numbers = {};
+        $scope.number = {};
+
+
+        $scope.buttonCount = function(tableForm) {
+
+            var request = {
+                url: '/api/admin/getNumb',
+                method: 'POST',
+                data: $scope.numbers
+            };
+            
+
+            $http(request)
+                .success(function(data, status, headers) {
+                    alert(data.numb);
+                    
+                })
+                .error(function(error, status, headers) {
+                    alert("Ошибка");
+                })
+        }
+        //____________________________________________________________
+
+
         /*
             request
             {
@@ -28,7 +56,7 @@
             }
         */
 
-        $scope.getList = function() {
+        $scope.getList = function(tableForm) {
             var request = {
                 url: '/api/admin/getPagedList',
                 method: 'POST',
@@ -89,6 +117,11 @@
             $state.go('main.userAdd');
         }
 
+
+
+    
+
+        
 
 
     });

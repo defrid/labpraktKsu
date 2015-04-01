@@ -5,6 +5,7 @@
                 div.panel-heading База зарегистрированных пользователей
                     button.btn.btn-default(ng-click="buttonClick_add()") Добавить           
                 div.panel-body
+                    
                     table.table.table-striped.table-bordered.table-hover
                         thead
                             tr
@@ -30,5 +31,12 @@
                         button.btn.btn-default(ng-disabled="curPage == 0", ng-click="buttonPrevious_page()") Предыдущая
                         button.btn.btn-default(ng-disabled="lastPage == curPage", ng-click="buttonNext_page()") Следующая
 
+
+    
+form.css-form(role='form', name='tableForm', novalidate)
+    .col-md-4.col-md-offset-4
+        input.form-control(type="number", name='numb_1',  ng-model="numbers.numb_1")
+        input.form-control(type="number", name='numb_2',  ng-model="numbers.numb_2")                       
+        button.btn.btn-default(ng-click="buttonCount(tableForm)") Считать
                  
             
