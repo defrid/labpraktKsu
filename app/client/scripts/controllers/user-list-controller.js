@@ -30,7 +30,10 @@
 
             $http(request)
                 .success(function(data, status, headers) {
-                    alert(data.numb);
+                    alert(data.sum);
+                    alert(data.neg);
+                    alert(data.mult);
+                    alert(data.divi);
                     
                 })
                 .error(function(error, status, headers) {

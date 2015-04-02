@@ -55,8 +55,21 @@ var list = [{
 
 function getNumb(request, response) {
     var numb = request.body;
-    console.log(numb);
-    response.send(numb);
+    var numb_1 = request.body.numb_1;
+    var numb_2 = request.body.numb_2;
+    var sum = numb_1 + numb_2;
+    var neg = numb_1 - numb_2;
+    var mult = numb_1 * numb_2;
+    var divi = numb_1 / numb_1;
+    
+    var res = {
+        sum: sum,
+        neg: neg,
+        mult: mult,
+        divi: divi,
+    };
+
+    response.send(res);
     
 }
 
