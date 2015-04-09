@@ -1,8 +1,9 @@
 var pg = require("pg");
 
 
-var connectionString = process.env.DATABASE_URL || 'postgres://admin:qwerty@localhost:5432/main_database';
+var connectionString = process.env.DATABASE_URL || 'postgres://postgres:123@localhost:5432/postgres';
 
+function GetUserFromBase(request, response){
 var client = new pg.Client(connectionString);
 client.connect();
 
@@ -11,6 +12,9 @@ client.query('SELECT * from users', function(err, result) {
     if(err) {
         return console.error('error running query', err);
     }
-    console.log(result.rows);
+    response.send(result);
     //output: 1
 });
+}
+
+  

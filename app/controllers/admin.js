@@ -4,7 +4,7 @@ var url = require('url');
 var express = require('express');
 var cookieParser = require('cookie-parser');
 
-//var adminBase = require('./base/admin-base');
+var adminBase = require('./base/admin-base');
 
 
 // import filesystem
@@ -33,7 +33,7 @@ function createRoutes(router) {
 
 };
 
-var list = [{
+/*var list = [{
     id: 1,
     user_lastname: "Иванцов",
     user_name: "Иван",
@@ -50,7 +50,7 @@ var list = [{
     date_create: "",
     date_change: ""
 }];
-
+*/
 
 
 function getNumb(request, response) {
@@ -84,7 +84,7 @@ var res = {
 
 //request - запрос, response - что мы в ответ пишем
 function GetUserList(request, response) {
-    //здесь на самом деле идёт обращение к базе, но пока так
+    var list = GetUserFromBase(request);
     response.send(list);
 }
 
