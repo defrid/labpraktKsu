@@ -7,6 +7,7 @@ var cookieParser = require('cookie-parser');
 var adminBase = require('./base/admin-base');
 
 
+
 // import filesystem
 var fs = require('fs');
 
@@ -61,16 +62,16 @@ function getNumb(request, response) {
     var neg = numb_1 - numb_2;
     var mult = numb_1 * numb_2;
     var divi = numb_1 / numb_1;
-    
+
     var res = {
         sum: sum,
         neg: neg,
         mult: mult,
-        divi: divi,
+        divi: divi
     };
 
     response.send(res);
-    
+
 }
 
 /*
@@ -82,10 +83,16 @@ var res = {
 }
 */
 
+GetUserList();
+
 //request - запрос, response - что мы в ответ пишем
 function GetUserList(request, response) {
-    var list = GetUserFromBase(request);
-    response.send(list);
+    adminBase.GetUserListFromBase(function (result) {
+        console.log(result);
+        //response.send(result);
+    }, function (err) {
+        response.send(500);
+    });
 }
 
 function GetUser(request, response) {
@@ -195,7 +202,3 @@ function CreateUser(user) {
 
 
 //_______________________________________________________
-
-
-
-
