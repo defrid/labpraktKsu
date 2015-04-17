@@ -40,19 +40,6 @@
         }
 
 
-        ///////////////////////////ТЕСТОВЫЙ ПРИМЕР
-        $scope.data = [{
-            odin: 1,
-            dva: 2,
-            tri: 3,
-            chetire: 4
-        }, {
-            odin: "one",
-            dva: "two",
-            tri: "three",
-            chetire: "four"
-        }];
-
         $scope.buttonClick = function(element) {
             alert(element.odin + ", " + element.dva);
         }

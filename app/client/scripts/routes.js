@@ -15,8 +15,8 @@
                 })
                 .state('main.files', {
                     url: '/files',
-                    templateUrl: 'views/partials/files.html',
-                    controller: 'fileUploadCtrl'
+                    templateUrl: 'views/partials/uploaded-files-tabl.html',
+                    controller: "UploadedFilesTablController"
                 })
                 .state('login', {
                     url: '/login',
@@ -44,12 +44,6 @@
                     url: '/user-add',
                     templateUrl: 'views/partials/user-add.html',
                     controller: "UserAddController"
-                })
-
-                .state('main.uploadedFiles', {
-                    url: '/uploaded-files-tabl',
-                    templateUrl: 'views/partials/uploaded-files-tabl.html',
-                    controller: "UploadedFilesTablController"
                 });
 
 

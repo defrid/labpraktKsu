@@ -23,118 +23,53 @@ module.exports = function(conf) {
 
 function createRoutes(router) {
     router.use(cookieParser());
-
-    router.get('/GetUserList', GetUserList);
     router.post('/GetUser', GetUser);
     router.post('/EditUser', EditUser);
     router.post('/SaveUser', SaveUser);
-    //роут на задание
     router.post('/getPagedList', GetPagedList);
-    router.post('/getNumb', getNumb);
-
+    router.post('/RemoveUser', RemoveUser);
 };
 
-/*var list = [{
-    id: 1,
-    user_lastname: "Иванцов",
-    user_name: "Иван",
-    user_surname: "Иванович",
-    email: "аврвар@",
-    date_create: "",
-    date_change: ""
-}, {
-    id: 2,
-    user_lastname: "Ровамнов",
-    user_name: "Роман",
-    user_surname: "Рованович",
-    email: "пврвр@",
-    date_create: "",
-    date_change: ""
-}];
-*/
-
-
-function getNumb(request, response) {
-    var numb = request.body;
-    var numb_1 = request.body.numb_1;
-    var numb_2 = request.body.numb_2;
-    var sum = numb_1 + numb_2;
-    var neg = numb_1 - numb_2;
-    var mult = numb_1 * numb_2;
-    var divi = numb_1 / numb_1;
-
-    var res = {
-        sum: sum,
-        neg: neg,
-        mult: mult,
-        divi: divi
-    };
-
-    response.send(res);
-
-}
-
-/*
-var res = {
-    curPage: что пришло в request,
-    count: что пришло в request,
-    lastPage: вычислить,
-    list: вырезать из массива list на сервере(см.выше)
-}
-*/
-
-GetUserList();
-
-//request - запрос, response - что мы в ответ пишем
-function GetUserList(request, response) {
-    adminBase.GetUserListFromBase(function (result) {
-        console.log(result);
-        //response.send(result);
-    }, function (err) {
-        response.send(500);
-    });
-}
-
 function GetUser(request, response) {
-    console.log(request.body);
     var user_id = request.body.user_id;
 
-    var user = null;
-
-    user = GetUserById(user_id); //тут на самом деле обращение к базе
-
-    if (user) //если пользователь нашелся(не null)
-        response.send(user);
-    else {
-        response.status(500); //код ошибки
-        response.send({
-            error: "User not found"
-        });
-    }
+    adminBase.GetUserById(user_id, function(result) {
+        response.send(result);
+    }, function(err) {
+        response.send(500);
+    });
 }
 
 function EditUser(request, response) {
     var editedUser = request.body;
 
-    var result = SaveUserById(editedUser);
-
-    if (result) //если база сказала ИСТИНА, дала добро, значит всё успешно сохранилось
-        response.send(200);
-    else
+    adminBase.SaveUser(editedUser, function(result) {
+        response.send(result);
+    }, function(err) {
         response.send(500);
+    });
+}
+
+function RemoveUser(request, response) {
+    var user_id = request.body.user_id;
+    adminBase.RemoveUser(user_id, function(result) {
+        response.send({
+            success: result
+        });
+    }, function(err) {
+        response.send(500);
+    });
 }
 
 
 function SaveUser(request, response) {
     var newUser = request.body;
 
-    var result = CreateUser(newUser);
-
-    if (result > 0)
-        response.send(200);
-    else
+    adminBase.CreateUser(newUser, function(result) {
+        response.send(result);
+    }, function(err) {
         response.send(500);
-
+    });
 }
 
 //универсальная функция, которая принимает страницу и количество
@@ -142,63 +77,18 @@ function SaveUser(request, response) {
 function GetPagedList(request, response) {
     var body = request.body;
 
-    var res = {
-        curPage: body.curPage,
-        count: body.count,
-        lastPage: Math.round(list.length / body.count - 1),
-        list: list.slice(body.count * body.curPage, body.count * body.curPage + body.count),
-    };
+    adminBase.GetPagedList(body.count, body.curPage,
+        function(result) {
+            var res = {
+                curPage: body.curPage,
+                count: body.count,
+                lastPage: Math.round(result.count / body.count - 1),
+                list: result.rows
+            };
 
-    response.send(res);
-    /*
-    var res = {
-        curPage: что пришло в request,
-        count: что пришло в request,
-        lastPage: вычислить,
-        list: вырезать из массива list на сервере(см.выше)
-    }*/
+            response.send(res);
+        },
+        function(err) {
+            response.send(500);
+        });
 }
-
-
-
-//типа здесь база данных
-function GetUserById(id) {
-    //здесь идёт обращение к базе за юзером, поиск идёт по id
-    for (var i = list.length - 1; i >= 0; i--) {
-        if (list[i].id == id) {
-            return list[i];
-        }
-    };
-    //закончилось обращение к базе, в переменной usser находится то что вернула база
-}
-
-
-//типа здесь база данных
-function SaveUserById(editedUser) {
-    editedUser.date_change = new Date().toString();
-    //здесь идёт обращение к базе за юзером, поиск идёт по id
-    for (var i = list.length - 1; i >= 0; i--) {
-        if (list[i].id == editedUser.id) {
-            list[i] = editedUser;
-            return true;
-        }
-    };
-    return false;
-    //закончилось обращение к базе, в переменной usser находится то что вернула база
-}
-
-
-//база, возвращает id новог пользовтеля или -1
-function CreateUser(user) {
-    user.date_create = new Date();
-
-    user.id = list.length + 1;
-
-    return list.push(user);
-
-
-}
-
-
-
-//_______________________________________________________
