@@ -9,31 +9,39 @@
                         fieldset
                             .form-group
                                 h3.panel-title Фамилия
-                                input.form-control(placeholder='Фамилия', name='user_lastname', type='text', ng-model="registerModel.user_lastname", required)
+                                input.form-control(placeholder='Фамилия', name='user_lastname', type='text', ng-model="user.user_lastname", required)
 
                             .form-group
                                 h3.panel-title Имя
-                                input.form-control(placeholder='Имя', name='user_name', type='text', autofocus='', ng-model="registerModel.user_name", required)
+                                input.form-control(placeholder='Имя', name='user_name', type='text', autofocus='', ng-model="user.user_name", required)
 
                             .form-group 
                                 h3.panel-title Отчество
-                                input.form-control(placeholder='Отчество', name='user_surname', type='text', ng-model="registerModel.user_surname", required)
+                                input.form-control(placeholder='Отчество', name='user_surname', type='text', ng-model="user.user_surname", required)
+                            .form-group 
+                                h3.panel-title Логин
+                                input.form-control(placeholder='Логин', name='login', type='text', ng-model="user.login", required)
 
                             .form-group 
                                 h3.panel-title Пароль
-                                input.form-control(placeholder='Пароль', name='password', type='password', ng-model="registerModel.password", required)
+                                input.form-control(placeholder='Пароль', name='password', type='password', ng-model="user.password", required)
 
                             .form-group 
                                 h3.panel-title Пароль еще раз
-                                input.form-control(placeholder='Пароль еще раз', name='password2', type='password', ng-model="registerModel.password2", required)
+                                input.form-control(placeholder='Пароль еще раз', name='password2', type='password', ng-model="user.password2", required)
 
                             .form-group 
                                 h3.panel-title E-mail
-                                input.form-control(placeholder='E-mail', name='e-mail', type='email', ng-model="registerModel.email", required)
+                                input.form-control(placeholder='E-mail', name='e-mail', type='email', ng-model="user.email", required)
 
                             .form-group
-                                h3.panel-title Форма обучения
-                                select.form-control(ng-model="registerModel.mode")
-                                    option(ng-repeat="mode in studyMode", value="{{mode.id}}") {{mode.m_name}}
+                                h3.panel-title Тип пользователя
+                                select.form-control(ng-model="user.user_type")
+                                    option(ng-repeat="type in user_type_list", value="{{type.type_id}}") {{type.m_name}}
+
+                            .form-group(ng-if="user.user_type == 1")
+                                h3.panel-title Группа
+                                select.form-control(ng-model="user.group_id")
+                                    option(ng-repeat="group in group_list", value="{{group.group_id}}") {{group.group_name}}
 
                             button.btn.btn-lg.btn-success.btn-block(type='submit', ng-click="register(RegisterForm)") Регистрация

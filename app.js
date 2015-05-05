@@ -4,7 +4,9 @@ var session = require('express-session')
 
 var fileUpload = require('./app/controllers/file-upload');
 
+var sessionCtrl = require('./app/controllers/session');
 var admin = require('./app/controllers/admin');
+var registration = require('./app/controllers/registration');
 
 var server_port = process.env.OPENSHIFT_NODEJS_PORT || 9000;
 var server_ip_address = process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1';
@@ -31,58 +33,10 @@ app.use(bodyParser.urlencoded({ // to support URL-encoded bodies
 // Routes
 app.use('/api/files', fileUpload());
 app.use('/api/admin', admin());
+app.use('/api/registration', registration());
+app.use('/api/session', sessionCtrl());
 
-function current_user(req) {
-  if (req.session.user_login) {
-    return {
-      login: "demo"
-    }
-  }
-  return null;
-}
 
-app.get('/api/session', function(req, res) {
-  var user = current_user(req);
-  if (!user) {
-    res.status(401);
-    res.send();
-  } else {
-    res.send(JSON.stringify({
-      login: user.login
-    }));
-  }
-});
-
-app.post('/api/session', function(req, res) {
-  if (req.body.login === 'demo' && req.body.password === 'kinetic') {
-
-    req.session.user_login = 'demo';
-    res.send(JSON.stringify({
-      success: true,
-      user: {
-        login: req.session.user_login
-      }
-    }));
-  } else {
-    res.status(401);
-    res.send(
-      JSON.stringify({
-        success: false,
-        errors: ["Login or password incorrect"]
-      })
-    )
-  };
-});
-
-function destroySession(req, res) {
-  req.session.user_login = null;
-  res.send(JSON.stringify({
-    success: true
-  }));
-};
-
-app.get('/api/session/destroy', destroySession);
-app.delete('/api/session', destroySession);
 
 app.get(['^/?[^\\.]*$'], function(req, res) {
   res.sendfile(__dirname + '/public/index.html');

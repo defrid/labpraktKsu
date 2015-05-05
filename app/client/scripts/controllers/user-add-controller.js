@@ -4,7 +4,7 @@
     module = angular.module("labPract");
     module.controller("UserAddController", function($scope, $state, $http) {
 
-        $scope.currentUser = {};
+        $scope.currentUser = {};//и больше вообще ничего не надо
 
         $scope.buttonClick_save = function(addForm) {
 

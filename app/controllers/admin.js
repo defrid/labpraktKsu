@@ -82,7 +82,7 @@ function GetPagedList(request, response) {
             var res = {
                 curPage: body.curPage,
                 count: body.count,
-                lastPage: Math.round(result.count / body.count - 1),
+                lastPage: Math.ceil(result.count / body.count - 1),
                 list: result.rows
             };
 

@@ -10,7 +10,7 @@
 
         $scope.curPage = 0; //текущая страница
 
-        $scope.count = 2; //количество отображаемых элементов
+        $scope.count = 5; //количество отображаемых элементов
 
         $scope.getList = function(tableForm) {
             var request = {

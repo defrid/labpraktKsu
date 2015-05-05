@@ -2,25 +2,36 @@
     'use strict';
     var module;
     module = angular.module("labPract");
-    module.controller("RegisterController", function($scope, $state, AuthService) {
+    module.controller("RegisterController", function($scope, $state, $http, AuthService) {
 
-        $scope.studyMode = [{
-            id: 1,
-            m_name: "Очная"
+        $scope.user_type_list = [{
+            type_id: 1,
+            m_name: "Студент"
         }, {
-            id: 2,
-            m_name: "Заочная"
+            user_type: 2,
+            m_name: "Преподаватель"
         }];
 
-        $scope.registerModel = {
-            user_name: "",
-            user_lastname: "",
-            user_surname: "",
-            password: "",
-            password2: "",
-            email: "",
-            mode: 1
-        }
+        $scope.user = {};
+        $scope.group_list = [];
+
+        $scope.GetGroupList = function() {
+
+            var options = {
+                method: 'GET',
+                url: '/api/registration/GetGroup'
+            };
+
+            $http(options)
+                .success(function(data, status, headers) {
+                    $scope.group_list = data;
+                })
+                .error(function(error, status, headers) {
+                    alert("Ошибка");
+                });
+        };
+
+        $scope.GetGroupList();
 
         $scope.register = function(RegisterForm) {
 
@@ -29,30 +40,26 @@
                 return;
             }
 
-            if ($scope.registerModel.password != $scope.registerModel.password2) {
+            if ($scope.user.password != $scope.user.password2) {
                 alert("пароли не совпадают");
                 return;
             }
 
             //здесь будет отправка нашей модели на сервер, для последующей добавки в базу
+            var options = {
+                method: 'POST',
+                url: '/api/registration/registerUser',
+                data: $scope.user
+            };
 
-            console.log($scope.registerModel)
+            $http(options)
+                .success(function(data, status, headers) {
+                    $state.go('main.userList');
+                })
+                .error(function(error, status, headers) {
+                    alert("Ошибка");
+                })
         }
-
-
-        $scope.buttonClick = function(element) {
-            alert(element.odin + ", " + element.dva);
-        }
-
-        /*  во что разворачивается ng-repeat(ну тип того)
-                for (var i = 0 ; i < studyMode.legnth; i++) {
-                    var mode = studyMode[i];
-
-                    value = mode.id;
-
-                    чевыводится = mode.m_name;
-                }
-        */
 
 
     });
