@@ -3,9 +3,9 @@
         div.table-responsive
             div.panel.panel-default
                 div.panel-heading База загруженных файлов
-                    button.btn.btn-default(ng-click="buttonClick_add()") Добавить файл          
+                    button.btn.btn-default(ngf-select ng-model="files") Добавить файл
                 div.panel-body
-                    
+
                     table.table.table-striped.table-bordered.table-hover
                         thead
                             tr
@@ -13,9 +13,9 @@
                                 th Статус работы(закончена/в процессе)
                                 th ФИО преподаваеля
                                 th Комментарий преподавателя
-                                th Оценка 
+                                th Оценка
                                 th Дата добавления
-                                
+
                         tbody
                             tr(ng-repeat="user in displayList")
                                 td {{ }}
@@ -24,12 +24,9 @@
                                 td {{ }}
                                 td {{ }}
                                 td {{ }}
-                                td 
+                                td
                                     button.btn.btn-default(ng-click="buttonClick_change(user)") Редактировать
                                     button.btn.btn-default(ng-click="buttonClick_delete(user)") Удалить
 
                         button.btn.btn-default(ng-disabled="curPage == 0", ng-click="buttonPrevious_page()") Предыдущая
                         button.btn.btn-default(ng-disabled="lastPage == curPage", ng-click="buttonNext_page()") Следующая
-
-
-    

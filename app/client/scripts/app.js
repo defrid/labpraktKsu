@@ -6,5 +6,6 @@
         'LocalStorageModule',
         'ngResource',
         'ui.bootstrap',
+		'ngFileUpload'
     ]);
 })(window, window.angular);
