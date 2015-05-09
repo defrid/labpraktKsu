@@ -40,6 +40,12 @@
                     controller: "UserListController"
                 })
 
+                .state('main.userProfile', {
+                    url: '/user-profile',
+                    templateUrl: 'views/partials/user-profile.html',
+                    controller: "UserProfileController"
+                })
+
                 .state('main.userAdd', {
                     url: '/user-add',
                     templateUrl: 'views/partials/user-add.html',

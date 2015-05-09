@@ -3,6 +3,11 @@ var express = require('express');
 var cookieParser = require('cookie-parser');
 
 var session = require('express-session');
+var loginBase = require('./base/login-base');
+
+var fs = require('fs');
+
+var http = require('http');
 
 module.exports = function(conf) {
     config = conf;
@@ -45,28 +50,36 @@ function get(req, res) {
 //app.post('/api/session', 
 function post(req, res) {
     //if (req.body.login === 'demo' && req.body.password === 'kinetic') 
- // запрос в базу (login, pass, callback, errcallback)
- // запрос вызовет callback если юзер есть и передаст в callback его id, для будущего использования
- // вызовет errorCallback в остальных случаях
-    {
+    // запрос в базу (login, pass, callback, errcallback)
+    // запрос вызовет callback если юзер есть и передаст в callback его id, для будущего использования
+    // вызовет errorCallback в остальных случаях
+    var login = req.body.login;
+    var password = req.body.password;
 
-        req.session.user_id = /*сюда id запишем*/;
-        res.send(JSON.stringify({
+    loginBase.CheckLoginPass(login, password, function(result) {
+
+        req.session.user_id = result;
+        res.send({
             success: true,
             user: {
                 user_id: req.session.user_id
             }
-        }));
-    } else {
+        });
+
+        //  console.log(user); 
+
+    }, function(err) {
         res.status(401);
-        res.send(
-            JSON.stringify({
-                success: false,
-                errors: ["Login or password incorrect"]
-            })
-        )
-    };
+        res.send({
+            success: false,
+            errors: err
+        });
+    });
+
+
 };
+
+
 
 function destroySession(req, res) {
     req.session.user_id = null;
