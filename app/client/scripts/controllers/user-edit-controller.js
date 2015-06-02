@@ -27,6 +27,7 @@
         };
 
         $scope.GetUserById($scope.user_id);
+     //   console.log($scope.user_id);
 
         $scope.buttonClick_save = function(EditForm) {
 

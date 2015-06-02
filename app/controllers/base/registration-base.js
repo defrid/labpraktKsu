@@ -38,6 +38,7 @@ function RegisterUser(user, callback, errorCallback) {
                         counter++;
 
                         if (counter == 2) {
+
                             callback(result);
                         }
                     }
@@ -54,11 +55,30 @@ function RegisterUser(user, callback, errorCallback) {
         });
 }
 
+
 function InsertIntoAuthTable(user_id, login, password, callback, errorCallback) {
     var client = new pg.Client(connectionString);
     client.connect();
 
     client.query('INSERT INTO auth VALUES($1, $2, $3)', [user_id, login, password], function(err, result) {
+        if (err) {
+            console.error('error running query', err);
+            return errorCallback(err);
+        }
+
+        callback({
+            user_id: user_id
+        });
+        client.end();
+    });
+}
+
+function InsertIntoUsersTable(user, callback, errorCallback) {
+    var client = new pg.Client(connectionString);
+    client.connect();
+
+    client.query('INSERT INTO users (user_lastname, user_name, user_surname, email, user_type)' +
+        'VALUES ($1, $2 ,$3, $4, $5) RETURNING id', [user.user_lastname, user.user_name, user.user_surname, user.email, user.user_type], function(err, result) {
         if (err) {
             console.error('error running query', err);
             return errorCallback(err);
@@ -99,6 +119,7 @@ function GetGroup(callback, errorCallback) {
         }
 
         callback(result.rows);
+        
         
         client.end();
     });

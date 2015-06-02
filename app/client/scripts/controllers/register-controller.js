@@ -2,18 +2,20 @@
     'use strict';
     var module;
     module = angular.module("labPract");
-    module.controller("RegisterController", function($scope, $state, $http, AuthService) {
+    module.controller("RegisterController", function($scope, $state, $http, md5, AuthService) {
 
         $scope.user_type_list = [{
             type_id: 1,
             m_name: "Студент"
         }, {
-            user_type: 2,
+            type_id: 2,
             m_name: "Преподаватель"
         }];
 
         $scope.user = {};
+        $scope.subject = {};
         $scope.group_list = [];
+        $scope.subj_list = [];
 
         $scope.GetGroupList = function() {
 
@@ -32,7 +34,10 @@
         };
 
         $scope.GetGroupList();
+        //   $scope.GetSubjectList();
+        
 
+        
         $scope.register = function(RegisterForm) {
 
             if (RegisterForm.$invalid) {
@@ -44,6 +49,11 @@
                 alert("пароли не совпадают");
                 return;
             }
+
+           // $scope.$watch('password', function() {
+                $scope.user.password = md5.createHash($scope.user.password || '');
+            //}
+            
 
             //здесь будет отправка нашей модели на сервер, для последующей добавки в базу
             var options = {

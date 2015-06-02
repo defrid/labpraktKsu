@@ -26,6 +26,7 @@ function registerUser(request, response) {
     });
 };
 
+
 function GetGroup(request, response) {
     registrationBase.GetGroup(function(result) {
         response.send(result);
@@ -33,6 +34,8 @@ function GetGroup(request, response) {
         response.send(500);
     });
 };
+
+
 
 /*var user = {
     login: "login",

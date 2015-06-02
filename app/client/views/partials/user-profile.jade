@@ -1,24 +1,20 @@
 .container
     .row
-        div.panel.panel-info
-            div.panel-heading Профиль Пользователя
-            div.panel-body
-                     form.css-form(role='form', name='ProfileForm', novalidate)
-                        fieldset
-                            .form-group
-                                h3.panel-title Фамилия
-                                 {{ghjgj}}
-
-                            .form-group
-                                h3.panel-title Имя
-                                input.form-control(placeholder='Имя', name='user_name', type='text', autofocus='', ng-model="currentUser.user_name", required)
-
-                            .form-group 
-                                h3.panel-title Отчество
-                                input.form-control(placeholder='Отчество', name='user_surname', type='text', ng-model="currentUser.user_surname", required)
-
-                            .form-group 
-                                h3.panel-title E-mail
-                                input.form-control(placeholder='E-mail', name='e-mail', type='email', ng-model="currentUser.email", required)
-
-                            
+        div.table-responsive
+            div.panel.panel-default
+                div.panel-heading Профиль текущего пользователя
+                              
+                div.panel-body
+                    label Фамилия
+                    div {{user_info.user_lastname}}
+                    label Имя
+                    div {{user_info.user_name}}  
+                    label Отчество
+                    div {{user_info.user_surname}}  
+                    label E-mail
+                    div {{user_info.email}}  
+                    label Тип пользователя
+                    .div(ng-if="user_info.user_type == 1") Студент
+                    .div(ng-if="user_info.user_type == 2") Преподаватель
+                    label Дата добавления
+                    div {{user_info.date_create}}  

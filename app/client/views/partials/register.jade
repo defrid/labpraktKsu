@@ -39,6 +39,8 @@
                                 select.form-control(ng-model="user.user_type")
                                     option(ng-repeat="type in user_type_list", value="{{type.type_id}}") {{type.m_name}}
 
+                  
+
                             .form-group(ng-if="user.user_type == 1")
                                 h3.panel-title Группа
                                 select.form-control(ng-model="user.group_id")

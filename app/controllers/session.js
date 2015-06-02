@@ -20,6 +20,7 @@ function createRoutes(router) {
     router.use(cookieParser());
     router.get('', get);
     router.post('', post);
+  //  router.get('/current_user', current_user);
     router.get('/destroy', destroySession);
     router.delete('', destroySession);
 };
@@ -29,7 +30,9 @@ function current_user(req) {
     if (req.session.user_id) {
         return {
             user_id: req.session.user_id
+            
         }
+        console.log(user_id);
     }
     return null;
 }

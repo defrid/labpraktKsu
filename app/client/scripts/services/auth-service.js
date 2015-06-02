@@ -59,9 +59,9 @@
                     } else if (SessionService.isLoggedIn() && !$rootScope.currentUser){
                         self._changeUser(SessionService.currentUser());
                     }
-                    return $http.get(config.appRootPath +'/session').then(function(user) {
-                        SessionService.update(user);
-                        self._changeUser(user);
+                    return $http.get(config.appRootPath +'/session').then(function(data) {
+                        SessionService.update(data.data);
+                        self._changeUser(data.data);
                     }, failAuth);
                 };
             }

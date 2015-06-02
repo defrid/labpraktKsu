@@ -52,6 +52,13 @@
                     controller: "UserAddController"
                 });
 
+              /*  .state('main.modalWinUploadedFiles', {
+                    url: '/modal-win-uploaded-files',
+                    templateUrl: 'views/partials/modal-win-uploaded-files.html',
+                    controller: "ModalWinUploadedFilesController"
+                });
+                */
+
 
 
                 
