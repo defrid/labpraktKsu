@@ -46,7 +46,7 @@ function GetFilePagedList(count, curPage, callback, errorCallback) {
     var client = new pg.Client(connectionString);
     client.connect();
 
-    var query = 'SELECT * FROM files ' +
+    var query = 'SELECT file_id, subj_id, user_id, date_create, file_name, comment_teacher, rating_type  FROM files ' +
         'LIMIT $1 OFFSET $2';
     client.query(query, [count, curPage * count], function(err, result) {
         if (err) {
@@ -82,11 +82,14 @@ function GetFileCount(callback) {
 
 
 
+
+
+//и как сборщик поймет какую функцию вызывать? дву функции с одним именем
 function GetFileById(file_id, callback, errorCallback) {
     var client = new pg.Client(connectionString);
     client.connect();
 
-    var query = 'SELECT * FROM files WHERE failes.id = $1;';
+    var query = 'SELECT file_data FROM files WHERE file_id = $1';
 
     client.query(query, [file_id], function(err, result) {
         if (err) {
@@ -94,25 +97,7 @@ function GetFileById(file_id, callback, errorCallback) {
             return errorCallback(err);
         }
 
-        callback(result.rows[0]);
-        client.end();
-    });
-}
-
-
-
-function GetFileById(file_id, callback, errorCallback) {
-    var client = new pg.Client(connectionString);
-    client.connect();
-
-    var query = 'SELECT * FROM files WHERE files.id = $1;';
-
-    client.query(query, [file_id], function(err, result) {
-        if (err) {
-            console.error('error running query', err);
-            return errorCallback(err);
-        }
-
+        //console.log(result.rows[0]);
         callback(result.rows[0]);
         client.end();
     });

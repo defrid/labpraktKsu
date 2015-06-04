@@ -7,9 +7,6 @@
 
  */
 // import express
-
-var pg = require("pg");
-
 var connectionString = process.env.DATABASE_URL || 'postgres://postgres:123@localhost:5432/postgres';
 
 var express = require('express');
@@ -134,13 +131,87 @@ function GetFilePagedList(req, res) {
 };
 
 
-function GetFileById(request, response) {
-    var file_id = request.body.file_id;
+/*function GetFileById(req, res) {
+    var file_id = req.body.file_id;
 
     uploadFile.GetFileById(file_id, function(result) {
-        response.send(result);
+        res.send(result);
     }, function(err) {
-        response.send(500);
+        res.send(500);
     });
 }
+/*
 
+function fileDownload(req, res) {
+    var sendResponse = (function() {
+        var count = 0;
+        var result = null;
+        return function(data) {
+            count++;
+            result = data || result;
+            if (count == 2) {
+                res.send(result);
+            }
+        }
+    })();
+
+    if (req.busboy) {
+        req.pipe(req.busboy);
+        req.busboy.on('file', function(fieldname, file, fields, filename, encoding, mimetype) {
+            // console.log('Проверка:', file);
+            var saveTo = path.join(os.tmpDir(), path.basename(fieldname));
+
+            file.setEncoding('hex');
+            var result = "";
+
+            file.on('data', function(data) {
+                result += data;
+            });
+
+            file.on('end', function() {
+                //  console.log('result:',result);
+
+            });
+
+            fs.readFile("file", 'hex', function(err, res) {
+                result = '\\x' + result;
+                console.log('result:', result);
+
+                uploadFile.fileUpload(result, fields, function(result) {
+                    sendResponse(result);
+                }, function(err) {
+                    sendResponse(500);
+                });
+
+            });
+
+
+
+        });
+        req.busboy.on('field', function(key, value, keyTruncated, valueTruncated) {
+            console.log(key, value);
+        });
+        req.busboy.on('finish', function() {
+
+            sendResponse();
+
+            console.log("Ну ок.");
+        });
+    }
+};
+
+*/
+
+
+function GetFileById(req, res) {
+    var file_id = req.body.file_id;
+
+    uploadFile.GetFileById(file_id, function(result) {
+        var buf = new Buffer(result.file_data.substr(2), 'hex');
+        res.send(buf);
+
+
+    }, function(err) {
+        res.send(500);
+    });
+}

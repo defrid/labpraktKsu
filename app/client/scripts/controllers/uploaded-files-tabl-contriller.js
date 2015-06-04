@@ -10,7 +10,7 @@
 
         $scope.rating_type = [{
             type_id: 1,
-            m_name: "Сделать работу над ошибками"
+            m_name: "Не проверено"
         }, {
             type_id: 2,
             m_name: "Неудовлетворительно"
@@ -23,9 +23,12 @@
         }, {
             type_id: 5,
             m_name: "Отлично"
+        }, {
+            type_id: 6,
+            m_name: "Сделать работу над ошибками"
         }];
 
-       
+
         $scope.user_type = [];
 
         $scope.subj_list = [];
@@ -101,28 +104,82 @@
                 });
         };
 
+        /*
+                        $scope.tableParams = new ngTableParams({
+                            curPage: $scope.curPage,
+                            count: $scope.count,
+                            filter: {
+                                    name: 'M'
+                                }
+                        }, {
+                            total: $scope.file_list.length,
+                            getData: function($defer, params) {
+
+                                var orderedData = params.filter() ?
+                                    $filter('filter')(data, params.filter()) :
+                                    data;
+
+                                $scope.file = orderedData.slice((params.curPage() - 1) * params.count(), params.curPage() * params.count());
+
+                                params.total(orderedData.length);
+                                $defer.resolve($scope.file);
+                            }
+                        });
+                    */
+
 
         $scope.GetSubjList();
 
         $scope.GetFilePagedList();
 
-        $scope.buttonClick_download = function(files) {
-            var request = {
-                url: '/api/files/GetFileById',
-                method: 'POST',
-                data: file_id
-                
+        $scope.buttonClick_download = (function() {
+            var a = document.createElement("a");
+            document.body.appendChild(a);
+            //a.style = "display: none";
+
+
+            return function(file) {
+                var request = {
+                    url: '/api/files/GetFileById',
+                    method: 'POST',
+                    data: {
+                        file_id: file.file_id
+                    },
+                    responseType: 'arraybuffer'
+                };
+                $http(request)
+                    .success(function(data, status, headers) {
+
+                        var blob = new Blob([data], {type: "octet/stream"}),
+                        url = window.URL.createObjectURL(blob);
+                        a.href = url;
+                        a.download = file.file_name;
+                        a.click();
+                        window.URL.revokeObjectURL(url);
+
+                    })
+                    .error(function(error, status, headers) {
+                        alert("Ошибка");
+                    })
+            };
+        })();
+        //____________________________Кнопки страниц_______________________________________________________
+
+        $scope.buttonNext_page = function() {
+            if ($scope.lastPage == $scope.curPage) {
+                return;
             }
-            $http(request)
-                .success(function(data, status, headers) {
-                    
+            $scope.curPage++;
+            $scope.GetFilePagedList();
+        }
 
-                })
-                .error(function(error, status, headers) {
-                    alert("Ошибка");
-                })
-        };
-
+        $scope.buttonPrevious_page = function() {
+            if ($scope.curPage == 0) {
+                return;
+            }
+            $scope.curPage--;
+            $scope.GetFilePagedList();
+        }
 
 
         // ________________________________________________________________________________________________________

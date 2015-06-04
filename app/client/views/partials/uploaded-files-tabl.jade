@@ -36,7 +36,8 @@
 
                                 td {{file.date_create}}
                                 td
-                                    button.btn.btn-default(ng-click="buttonClick_download()") скачать
+                                    button.btn.btn-default(ng-click="buttonClick_download(file)") скачать
+                                    button.btn.btn-default(ng-click=" ") редактировать
                                    
 
                         button.btn.btn-default(ng-disabled="curPage == 0", ng-click="buttonPrevious_page()") Предыдущая

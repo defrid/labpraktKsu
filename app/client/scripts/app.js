@@ -8,6 +8,6 @@
         'ui.bootstrap',
 		'ngFileUpload',
         'angular-md5'
-        //'controllers'
+       // 'ngTable'
     ]);
 })(window, window.angular);
