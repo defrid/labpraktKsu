@@ -37,7 +37,7 @@ function GetPagedList(count, curPage, callback, errorCallback) {
     var client = new pg.Client(connectionString);
     client.connect();
 
-    var query = 'SELECT * FROM users ' +
+    var query = 'SELECT id, user_lastname, user_name, user_surname, email, date_create, date_change, group_name FROM users LEFT OUTER JOIN stud_group ON users.group_id = stud_group.group_id ' +
         'LIMIT $1 OFFSET $2';
     client.query(query, [count, curPage * count], function(err, result) {
         if (err) {

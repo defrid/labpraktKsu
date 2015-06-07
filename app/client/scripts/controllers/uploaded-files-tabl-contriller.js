@@ -29,7 +29,7 @@
         }];
 
 
-        $scope.user_type = [];
+        $scope.user = [];
 
         $scope.subj_list = [];
 
@@ -39,23 +39,16 @@
 
         $scope.count = 5; //количество отображаемых элементов
 
-        $scope.subj = {};
+        $scope.subject = [];
 
-        $scope.upload = function(files) {
-            if (files && files.length) {
-                for (var i = 0; i < files.length; i++) {
-                    var file = files[i];
-                    Upload.upload({
-                        url: 'api/files/fileUpload',
-                        file: file,
-                        fields: {
-                            file_name: file.name
-                        }
-                    }).progress(function(evt) {}).success(function(data, status, headers, config) {
-                        console.log('file ' + config.file.name + ' uploaded. Response: ' + data);
-                    });
+
+        $scope.displaySubject = function(subject_id) {
+            for (var i = $scope.subj_list.length - 1; i >= 0; i--) {
+                if ($scope.subj_list[i].subject_id == subject_id) {
+                    return $scope.subj_list[i].subject_name;
                 }
-            }
+            };
+            return 'Нет';
         };
 
 
@@ -78,7 +71,6 @@
         };
 
 
-
         $scope.GetFilePagedList = function() {
 
             var options = {
@@ -95,6 +87,7 @@
                 .success(function(data, status, headers) {
                     // $scope.file_list = data;
                     $scope.file_list = data.list;
+
                     console.log('Проверка:', $scope.file_list);
                     $scope.lastPage = data.lastPage < 0 ? 0 : data.lastPage;
 
@@ -132,6 +125,30 @@
 
         $scope.GetFilePagedList();
 
+        //передаем subj_list, а используем subject. ВОТ ЭТО ПОВОРОТ
+        $scope.upload = function(files) {
+            if (files && files.length) {
+                for (var i = 0; i < files.length; i++) {
+                    var file = files[i];
+
+                    Upload.upload({
+                        url: 'api/files/fileUpload',
+                        file: file,
+                        fields: {
+                            file_name: file.name,
+                            subj_id: $scope.subject_id,
+                            user_id: $scope.GetUserId().user_id
+                        }
+
+                    }).progress(function(evt) {}).success(function(data, status, headers, config) {
+                        console.log('file ' + config.file.name + ' uploaded. Response: ' + data);
+
+                    });
+                }
+            }
+        };
+
+
         $scope.buttonClick_download = (function() {
             var a = document.createElement("a");
             document.body.appendChild(a);
@@ -150,8 +167,10 @@
                 $http(request)
                     .success(function(data, status, headers) {
 
-                        var blob = new Blob([data], {type: "octet/stream"}),
-                        url = window.URL.createObjectURL(blob);
+                        var blob = new Blob([data], {
+                                type: "octet/stream"
+                            }),
+                            url = window.URL.createObjectURL(blob);
                         a.href = url;
                         a.download = file.file_name;
                         a.click();
@@ -163,7 +182,7 @@
                     })
             };
         })();
-        //____________________________Кнопки страниц_______________________________________________________
+        //____________________________Кнопки_______________________________________________________
 
         $scope.buttonNext_page = function() {
             if ($scope.lastPage == $scope.curPage) {
@@ -181,30 +200,18 @@
             $scope.GetFilePagedList();
         }
 
+        $scope.buttonEdit_rating = function(file_id) {
+            $state.go('main.editRating', {
+                file_id: file_id
+            });
+        }
 
         // ________________________________________________________________________________________________________
-
         $scope.GetUserId = function() {
             return localStorageService.get('currentUser');
         };
 
-        $scope.GetUserById = function(id) {
-            var options = {
-                method: 'POST',
-                url: '/api/admin/GetUser',
-                data: $scope.GetUserId()
-            };
 
-
-            $http(options)
-                .success(function(data, status, headers) {
-                    $scope.user_type = data.user_type;
-                })
-                .error(function(error, status, headers) {
-                    alert("Ошибка");
-                })
-        };
-        $scope.GetUserById();
 
     });
 })(window, window.angular);

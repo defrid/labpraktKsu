@@ -49,31 +49,37 @@ function createRoutes(router) {
     router.post('/fileupload', fileUpload);
     router.post('/GetFilePagedList', GetFilePagedList);
     router.post('/GetFileById', GetFileById);
-
-
+    router.post('/GetFileIdForRating', GetFileIdForRating);
+    router.post('/EditRatingFile', EditRatingFile);
 };
 
 
 function fileUpload(req, res) {
-    var sendResponse = (function() {
+    /*var sendResponse = (function() {
         var count = 0;
         var result = null;
         return function(data) {
             count++;
             result = data || result;
             if (count == 2) {
-                res.send(result);
+                
             }
         }
     })();
+    */
+    var file_container = {
+        file_data: null
+    };
 
     if (req.busboy) {
         req.pipe(req.busboy);
-        req.busboy.on('file', function(fieldname, file, fields, filename, encoding, mimetype) {
-            // console.log('Проверка:', file);
+        //когда срабатывает эта функция в field только file_name
+        req.busboy.on('file', function(fieldname, file, field, filename, encoding, mimetype) {
+
             var saveTo = path.join(os.tmpDir(), path.basename(fieldname));
 
             file.setEncoding('hex');
+
             var result = "";
 
             file.on('data', function(data) {
@@ -81,31 +87,22 @@ function fileUpload(req, res) {
             });
 
             file.on('end', function() {
-                //  console.log('result:',result);
-
-            });
-
-            fs.readFile("file", 'hex', function(err, res) {
-                result = '\\x' + result;
-                console.log('result:', result);
-
-                uploadFile.fileUpload(result, fields, function(result) {
-                    sendResponse(result);
-                }, function(err) {
-                    sendResponse(500);
-                });
-
+                file_container.file_data = '\\x' + result;
             });
 
 
 
         });
         req.busboy.on('field', function(key, value, keyTruncated, valueTruncated) {
-            console.log(key, value);
+            //console.log(key, value);//поля еще читаются, когда файл уже пишется
+            file_container[key] = value;
         });
         req.busboy.on('finish', function() {
-
-            sendResponse();
+            uploadFile.fileUpload(file_container, function(result) {
+                res.send(result);
+            }, function(err) {
+                res.send(500);
+            });
 
             console.log("Ну ок.");
         });
@@ -131,78 +128,6 @@ function GetFilePagedList(req, res) {
 };
 
 
-/*function GetFileById(req, res) {
-    var file_id = req.body.file_id;
-
-    uploadFile.GetFileById(file_id, function(result) {
-        res.send(result);
-    }, function(err) {
-        res.send(500);
-    });
-}
-/*
-
-function fileDownload(req, res) {
-    var sendResponse = (function() {
-        var count = 0;
-        var result = null;
-        return function(data) {
-            count++;
-            result = data || result;
-            if (count == 2) {
-                res.send(result);
-            }
-        }
-    })();
-
-    if (req.busboy) {
-        req.pipe(req.busboy);
-        req.busboy.on('file', function(fieldname, file, fields, filename, encoding, mimetype) {
-            // console.log('Проверка:', file);
-            var saveTo = path.join(os.tmpDir(), path.basename(fieldname));
-
-            file.setEncoding('hex');
-            var result = "";
-
-            file.on('data', function(data) {
-                result += data;
-            });
-
-            file.on('end', function() {
-                //  console.log('result:',result);
-
-            });
-
-            fs.readFile("file", 'hex', function(err, res) {
-                result = '\\x' + result;
-                console.log('result:', result);
-
-                uploadFile.fileUpload(result, fields, function(result) {
-                    sendResponse(result);
-                }, function(err) {
-                    sendResponse(500);
-                });
-
-            });
-
-
-
-        });
-        req.busboy.on('field', function(key, value, keyTruncated, valueTruncated) {
-            console.log(key, value);
-        });
-        req.busboy.on('finish', function() {
-
-            sendResponse();
-
-            console.log("Ну ок.");
-        });
-    }
-};
-
-*/
-
-
 function GetFileById(req, res) {
     var file_id = req.body.file_id;
 
@@ -211,6 +136,45 @@ function GetFileById(req, res) {
         res.send(buf);
 
 
+    }, function(err) {
+        res.send(500);
+    });
+}
+
+/*
+function GetSubjectById(req, res) {
+    var subject_id = req.body.subj_id;
+    console.log(subject_id);
+
+    uploadFile.GetSubjectById(subject_id, function(result) {
+        
+        res.send(result);
+    }, function(err) {
+        res.send(500);
+    });
+}
+*/
+
+function EditRatingFile(req, res) {
+    var comment_teacher = req.body.comment_teacher;
+    var rating_type = req.body.rating;
+    var file_id = req.body.file_id;
+    console.log(comment_teacher);
+    uploadFile.EditRatingFile(comment_teacher, rating_type, file_id, function(result) {
+        //console.log(result);
+        res.send(result);
+    }, function(err) {
+        res.send(500);
+    });
+}
+
+
+function GetFileIdForRating(req, res) {
+    var file_id = req.body.file_id;
+    //console.log(file_id);
+    uploadFile.GetFileIdForRating(file_id, function(result) {
+        //console.log(result);
+        res.send(result);
     }, function(err) {
         res.send(500);
     });

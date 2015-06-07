@@ -41,5 +41,9 @@
 
 
         }
+
+    $scope.buttonRegister = function() {
+            $state.go('register');
+        }
     });
 })(window, window.angular);

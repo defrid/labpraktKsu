@@ -1,17 +1,17 @@
 .container
     .row
         div.table-responsive
+            
             div.panel.panel-default
                 div.panel-heading База загруженных файлов
                     .form-group
                     h3.panel-title Выберите предмет
-                         select.form-control(ng-model="subj_list.subject_id")
-                                option(ng-repeat="subj in subj_list", value="{{subj.subject_id}}") {{subj.subject_name}}
+                         select.form-control(ng-model="subject_id")
+                                option(ng-repeat="subject in subj_list", value="{{subject.subject_id}}") {{subject.subject_name}}
 
                     button.btn.btn-default(ngf-select ng-model="files") Добавить файл
                     
                 div.panel-body
-
                     table.table.table-striped.table-bordered.table-hover
                         thead
                             tr
@@ -21,23 +21,22 @@
                                 th Комментарий преподавателя
                                 th Оценка
                                 th Дата добавления
+                                th Дата изменения
 
                         tbody
                             tr(ng-repeat="file in file_list")
-                                td {{ }}
+                                
+                                td {{file.user_lastname}}
                                 td {{file.file_name}}
-                                td {{ }}
-                                td 
-                                    textarea.form-control(type='comment', ng-model="user.comment", required)
-
-                                td(ng-if="user_type == 2")
-                                    select.form-control
-                                        option(ng-repeat="rating in rating_type", value="{{rating.type_id}}") {{rating.m_name}}
-
-                                td {{file.date_create}}
+                                td {{displaySubject(file.subj_id)}}
+                                td {{file.comment_teacher}}
+                                td {{rating_type[file.rating_type - 1].m_name}}
+                                td {{file.date_create_file| date:'dd.MM.yyyy'}}
+                                td {{file.date_change_file| date:'dd.MM.yyyy'}}
                                 td
                                     button.btn.btn-default(ng-click="buttonClick_download(file)") скачать
-                                    button.btn.btn-default(ng-click=" ") редактировать
+                                td
+                                    button.btn.btn-default(ng-click="buttonEdit_rating(file.file_id)") оценить/прокомментировать
                                    
 
                         button.btn.btn-default(ng-disabled="curPage == 0", ng-click="buttonPrevious_page()") Предыдущая

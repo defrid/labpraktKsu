@@ -18,8 +18,8 @@ function RegisterUser(user, callback, errorCallback) {
     var client = new pg.Client(connectionString);
     client.connect();
 
-    client.query('INSERT INTO users (user_lastname, user_name, user_surname, email, user_type)' +
-        'VALUES ($1, $2 ,$3, $4, $5) RETURNING id', [user.user_lastname, user.user_name, user.user_surname, user.email, user.user_type],
+    client.query('INSERT INTO users (user_lastname, user_name, user_surname, email, user_type, group_id)' +
+        'VALUES ($1, $2 ,$3, $4, $5, $6) RETURNING id', [user.user_lastname, user.user_name, user.user_surname, user.email, user.user_type, user.group_id],
         function(err, result) {
             if (err) {
                 console.error('error running query', err);

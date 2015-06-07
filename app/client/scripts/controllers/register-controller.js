@@ -51,7 +51,9 @@
             }
 
            // $scope.$watch('password', function() {
-                $scope.user.password = md5.createHash($scope.user.password || '');
+                var credentials = angular.copy($scope.user.password);
+                credentials = md5.createHash($scope.user.password || '');
+                $scope.user.password = credentials;
             //}
             
 

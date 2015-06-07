@@ -46,6 +46,12 @@
                     controller: "UserProfileController"
                 })
 
+                .state('main.editRating', {
+                    url: '/edit-rating/:file_id',
+                    templateUrl: 'views/partials/edit-rating.html',
+                    controller: "EditRatingController"
+                })
+
                 .state('main.userAdd', {
                     url: '/user-add',
                     templateUrl: 'views/partials/user-add.html',

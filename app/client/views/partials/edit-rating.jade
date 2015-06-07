@@ -1,0 +1,24 @@
+.container
+    .row
+        div.panel.panel-default
+            div.panel-heading Редактирование
+            div.panel-body
+                     
+                    label Имя Файла
+                    div {{file_info.file_name}}
+
+                    label Комментарий преподавателя
+                    
+                    textarea.form-control(placeholder='комментарий', name='comment_teacher', type='text', ng-model="file_info.comment_teacher")
+
+                    label Оценка
+                    div
+                        select.form-control(ng-model="file_info.rating")
+                            option(ng-repeat="rating in rating_type", value="{{rating.type_id}}") {{rating.m_name}}
+
+                    
+
+
+                button.btn.btn-default(ng-click="buttonClick_save()") Сохранить
+                button.btn.btn-default(ng-click="buttonClick_cancel()") Отменить
+// брысь
