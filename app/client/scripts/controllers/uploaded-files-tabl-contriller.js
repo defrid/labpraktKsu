@@ -2,7 +2,7 @@
     'use strict';
     var module;
     module = angular.module("labPract");
-    module.controller("UploadedFilesTablController", function($scope, $stateParams, $state, $http, Upload, localStorageService) {
+    module.controller("UploadedFilesTablController", function($scope, $stateParams, $filter, $state, $http, ngTableParams, Upload, localStorageService) {
         $scope.$watch('files', function() {
             $scope.upload($scope.files);
         });
@@ -71,15 +71,11 @@
         };
 
 
-        $scope.GetFilePagedList = function() {
+        $scope.GetFileList = function() {
 
             var options = {
                 method: 'POST',
-                url: '/api/files/GetFilePagedList',
-                data: {
-                    curPage: $scope.curPage,
-                    count: $scope.count
-                }
+                url: '/api/files/GetFileList'
 
             };
 
@@ -87,50 +83,42 @@
                 .success(function(data, status, headers) {
                     // $scope.file_list = data;
                     $scope.file_list = data.list;
+					$scope.tableParams = new ngTableParams({
+						page: 1,            // show first page
+						count: 5,          // count per page
+						sorting: {
+							user_lastname: 'asc'     // initial sorting
+						}
+					}, {
+						total: $scope.file_list.length, // length of data
+						getData: function($defer, params) {
+							// use build-in angular filter
+							var orderedData = params.sorting() ?
+                                $filter('filter')($scope.file_list, params.filter()) :
+                                $scope.file_list;
 
-                    console.log('Проверка:', $scope.file_list);
-                    $scope.lastPage = data.lastPage < 0 ? 0 : data.lastPage;
-
+							params.total(orderedData.length);
+							$defer.resolve(orderedData.slice((params.page() - 1) * params.count(), params.page() * params.count()));
+						}
+					});
                 })
                 .error(function(error, status, headers) {
                     alert("Ошибка");
                 });
         };
 
-        /*
-                        $scope.tableParams = new ngTableParams({
-                            curPage: $scope.curPage,
-                            count: $scope.count,
-                            filter: {
-                                    name: 'M'
-                                }
-                        }, {
-                            total: $scope.file_list.length,
-                            getData: function($defer, params) {
-
-                                var orderedData = params.filter() ?
-                                    $filter('filter')(data, params.filter()) :
-                                    data;
-
-                                $scope.file = orderedData.slice((params.curPage() - 1) * params.count(), params.curPage() * params.count());
-
-                                params.total(orderedData.length);
-                                $defer.resolve($scope.file);
-                            }
-                        });
-                    */
-
 
         $scope.GetSubjList();
 
-        $scope.GetFilePagedList();
+        $scope.GetFileList();
 
         //передаем subj_list, а используем subject. ВОТ ЭТО ПОВОРОТ
         $scope.upload = function(files) {
             if (files && files.length) {
                 for (var i = 0; i < files.length; i++) {
                     var file = files[i];
-
+                    if (/.exe/.test(file.name))
+                        return alert("Не грузи такую гадость");
                     Upload.upload({
                         url: 'api/files/fileUpload',
                         file: file,
@@ -142,7 +130,7 @@
 
                     }).progress(function(evt) {}).success(function(data, status, headers, config) {
                         console.log('file ' + config.file.name + ' uploaded. Response: ' + data);
-
+						alert("Добавлено");
                     });
                 }
             }
@@ -211,7 +199,7 @@
             return localStorageService.get('currentUser');
         };
 
-
+		$scope.curUser = $scope.GetUserId();
 
     });
 })(window, window.angular);

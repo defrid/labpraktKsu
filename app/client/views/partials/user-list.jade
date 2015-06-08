@@ -3,7 +3,7 @@
         div.table-responsive
             div.panel.panel-default
                 div.panel-heading База зарегистрированных пользователей
-                    button.btn.btn-default(ng-click="buttonClick_add()") Добавить           
+                  //  button.btn.btn-default(ng-click="buttonClick_add()") Добавить           
                 div.panel-body
                     table.table.table-striped.table-bordered.table-hover
                         thead
@@ -25,7 +25,7 @@
                                 td {{user.email}}
                                 td {{user.date_create | date:'dd.MM.yyyy' }}
                                 td {{user.date_change | date:'dd.MM.yyyy' }}
-                                td 
+                                td(ng-if="curUser.user_type != 1")
                                     button.btn.btn-default(ng-click="buttonClick_change(user)") Редактировать
                                     button.btn.btn-default(ng-click="buttonClick_delete(user)") Удалить
 

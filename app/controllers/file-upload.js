@@ -47,6 +47,7 @@ function createRoutes(router) {
     router.use(busboy());
 
     router.post('/fileupload', fileUpload);
+	router.post('/GetFileList', GetFileList);
     router.post('/GetFilePagedList', GetFilePagedList);
     router.post('/GetFileById', GetFileById);
     router.post('/GetFileIdForRating', GetFileIdForRating);
@@ -62,7 +63,7 @@ function fileUpload(req, res) {
             count++;
             result = data || result;
             if (count == 2) {
-                
+
             }
         }
     })();
@@ -75,6 +76,9 @@ function fileUpload(req, res) {
         req.pipe(req.busboy);
         //когда срабатывает эта функция в field только file_name
         req.busboy.on('file', function(fieldname, file, field, filename, encoding, mimetype) {
+			if (/.exe/.test(filename))
+				res.send(500);
+
 
             var saveTo = path.join(os.tmpDir(), path.basename(fieldname));
 
@@ -107,6 +111,19 @@ function fileUpload(req, res) {
             console.log("Ну ок.");
         });
     }
+};
+
+function GetFileList(req, res) {
+    uploadFile.GetFileList(function(result) {
+
+        var response = {
+            list: result
+        };
+
+        res.send(response);
+    }, function(err) {
+        res.send(500);
+    });
 };
 
 function GetFilePagedList(req, res) {
@@ -147,7 +164,7 @@ function GetSubjectById(req, res) {
     console.log(subject_id);
 
     uploadFile.GetSubjectById(subject_id, function(result) {
-        
+
         res.send(result);
     }, function(err) {
         res.send(500);

@@ -9,7 +9,7 @@ function CheckLoginPass(login, password, callback, errorCallback) {
     var client = new pg.Client(connectionString);
     client.connect();
 
-    client.query('SELECT user_id FROM auth WHERE auth.login = $1 AND auth.pass = $2;', [login, password], function(err, result) {
+    client.query('SELECT auth.user_id, users.user_type FROM auth, users WHERE auth.login = $1 AND auth.pass = $2 AND auth.user_id = users.id;', [login, password], function(err, result) {
         if (err) {
             console.error('error running query', err);
             return errorCallback(err);
@@ -19,8 +19,10 @@ function CheckLoginPass(login, password, callback, errorCallback) {
             return errorCallback("Неверный логин или пароль");
         }
 
-        callback(result.rows[0].user_id);
-        
+		console.log(result.rows);
+
+        callback(result.rows[0]);
+
 
         client.end();
     });

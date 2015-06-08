@@ -7,7 +7,7 @@
         'ngResource',
         'ui.bootstrap',
 		'ngFileUpload',
-        'angular-md5'
-        //'ngTable'
+        'angular-md5',
+        'ngTable'
     ]);
 })(window, window.angular);

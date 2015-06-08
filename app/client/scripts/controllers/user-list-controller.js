@@ -2,7 +2,7 @@
     'use strict';
     var module;
     module = angular.module("labPract");
-    module.controller("UserListController", function($scope, $state, $http) {
+    module.controller("UserListController", function($scope, $state, $http, localStorageService) {
 
         $scope.userList = []; //полный список
 
@@ -81,6 +81,13 @@
         $scope.buttonClick_add = function() {
             $state.go('main.userAdd');
         }
+
+        $scope.GetUserId = function() {
+            return localStorageService.get('currentUser');
+        };
+
+        $scope.curUser = $scope.GetUserId();
+
 
     });
 })(window, window.angular);

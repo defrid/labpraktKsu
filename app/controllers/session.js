@@ -29,15 +29,15 @@ function createRoutes(router) {
 function current_user(req) {
     if (req.session.user_id) {
         return {
-            user_id: req.session.user_id
-            
+            user_id: req.session.user_id,
+			user_type: req.session.user_type
         }
         console.log(user_id);
     }
     return null;
 }
 
-////app.get('/api/session', 
+////app.get('/api/session',
 function get(req, res) {
     var user = current_user(req);
     if (!user) {
@@ -45,14 +45,14 @@ function get(req, res) {
         res.send();
     } else {
         res.send(JSON.stringify({
-            user_id: user.user_id
+            user_id: user.user_id,
+			user_type: req.session.user_type
         }));
     }
 };
 
-//app.post('/api/session', 
+//app.post('/api/session',
 function post(req, res) {
-    //if (req.body.login === 'demo' && req.body.password === 'kinetic') 
     // запрос в базу (login, pass, callback, errcallback)
     // запрос вызовет callback если юзер есть и передаст в callback его id, для будущего использования
     // вызовет errorCallback в остальных случаях
@@ -61,15 +61,17 @@ function post(req, res) {
 
     loginBase.CheckLoginPass(login, password, function(result) {
 
-        req.session.user_id = result;
+        req.session.user_id = result.user_id;
+		req.session.user_type = result.user_type;
         res.send({
             success: true,
             user: {
-                user_id: req.session.user_id
+                user_id: req.session.user_id,
+				user_type: req.session.user_type
             }
         });
 
-        //  console.log(user); 
+        //  console.log(user);
 
     }, function(err) {
         res.status(401);

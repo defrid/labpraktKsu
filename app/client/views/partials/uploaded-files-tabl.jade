@@ -1,7 +1,7 @@
 .container
     .row
         div.table-responsive
-            
+
             div.panel.panel-default
                 div.panel-heading База загруженных файлов
                     .form-group
@@ -10,10 +10,22 @@
                                 option(ng-repeat="subject in subj_list", value="{{subject.subject_id}}") {{subject.subject_name}}
 
                     button.btn.btn-default(ngf-select ng-model="files") Добавить файл
-                    
+
                 div.panel-body
-                    table.table.table-striped.table-bordered.table-hover
-                        thead
+                    table.table.table-striped.table-bordered.table-hover(ng-table="tableParams", show-filter="true")
+                      tr(ng-repeat="file in $data")
+                        td(data-title="'Студент'", filter="{ 'user_lastname': 'text' }") {{file.user_lastname}}
+                        td(data-title="'Имя Файла'", filter="{ 'file_name': 'text' }") {{file.file_name}}
+                        td(data-title="'Название предмета'") {{displaySubject(file.subj_id)}}
+                        td(data-title="'Комментарий преподавателя'") {{file.comment_teacher}}
+                        td(data-title="'Оценка'") {{rating_type[file.rating_type - 1].m_name}}
+                        td(data-title="'Дата добавления'") {{file.date_create_file| date:'dd.MM.yyyy'}}
+                        td(data-title="'Дата изменения'") {{file.date_change_file| date:'dd.MM.yyyy'}}
+                        td(ng-if="curUser.user_type != 1")
+                          button.btn.btn-default(ng-click="buttonClick_download(file)") Скачать
+                        td(ng-if="curUser.user_type != 1")
+                          button.btn.btn-default(ng-click="buttonEdit_rating(file.file_id)") Оценка
+                        //thead
                             tr
                                 th Студент
                                 th Имя Файла
@@ -23,9 +35,8 @@
                                 th Дата добавления
                                 th Дата изменения
 
-                        tbody
+                        //tbody
                             tr(ng-repeat="file in file_list")
-                                
                                 td {{file.user_lastname}}
                                 td {{file.file_name}}
                                 td {{displaySubject(file.subj_id)}}
@@ -37,7 +48,7 @@
                                     button.btn.btn-default(ng-click="buttonClick_download(file)") скачать
                                 td
                                     button.btn.btn-default(ng-click="buttonEdit_rating(file.file_id)") оценить/прокомментировать
-                                   
 
-                        button.btn.btn-default(ng-disabled="curPage == 0", ng-click="buttonPrevious_page()") Предыдущая
-                        button.btn.btn-default(ng-disabled="lastPage == curPage", ng-click="buttonNext_page()") Следующая
+
+                        //button.btn.btn-default(ng-disabled="curPage == 0", ng-click="buttonPrevious_page()") Предыдущая
+                        //button.btn.btn-default(ng-disabled="lastPage == curPage", ng-click="buttonNext_page()") Следующая
